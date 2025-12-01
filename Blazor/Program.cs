@@ -2,6 +2,7 @@ using Blazor.Components;
 
 namespace Blazor
 {
+    //test github
     public class Program
     {
         public static void Main(string[] args)
