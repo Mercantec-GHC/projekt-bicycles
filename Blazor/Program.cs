@@ -2,7 +2,7 @@ using Blazor.Components;
 
 namespace Blazor
 {
-    //test github
+    //test github change
     public class Program
     {
         public static void Main(string[] args)
