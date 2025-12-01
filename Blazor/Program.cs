@@ -1,7 +1,5 @@
 using Blazor.Components;       // For Blazor Components
 using Blazor.Services;         // For BikeService
-using Npgsql;                  // For PostgreSQL connections (used in BikeService)
-using Microsoft.Extensions.Configuration; // For reading configuration (appsettings.json)
 
 namespace Blazor
 {
@@ -14,11 +12,11 @@ namespace Blazor
             var builder = WebApplication.CreateBuilder(args);
 
             // Add Blazor Server interactive components services
-            builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents();
+            builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
             // Read the connection string from appsettings.json (DefaultConnection)
-            string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Database connection string is missing!");
 
             // Register BikeService as a singleton in the dependency injection container
             // BikeService will use this connection string to connect to the Neon PostgreSQL database
@@ -50,8 +48,7 @@ namespace Blazor
             app.MapStaticAssets();
 
             // Map Blazor components for server-side interactive rendering
-            app.MapRazorComponents<App>()
-                .AddInteractiveServerRenderMode();
+            app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
             // Run the application
             app.Run();

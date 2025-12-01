@@ -6,9 +6,6 @@
 
         // user who listed the bike (just ID)
         public int UserId { get; set; }
-
-        // user who listed the bike (User instance to work with it like bikeName.User.Name)
-        public User? User { get; set; }
         public string? Title { get; set; }
         public decimal Price { get; set; }
         public string? Color { get; set; }
@@ -29,6 +26,9 @@
 
         // messages related to the bike
         public List<Message>? Messages { get; set; }
+
+        // user who listed the bike (User instance to work with it like bikeName.User.Name)
+        public User? User { get; set; }
     }
 
 }
