@@ -16,10 +16,10 @@
         <p>Discover bikes for every ride</p>
     </div>
 </header>
-<h1>Hello, world!</h1>
-<p>Welcome to your new app.</p>
-
-<h3>Newest Bikes</h3>
+ 
+<section class="new-products">
+    <h2>Newest Products</h2>
+</section>
 
 <div class="bikes-container">
     @foreach (var bike in NewestBikes)
@@ -46,6 +46,3 @@
         NewestBikes = BikeService.GetNewestBikes();
     }
 }
-<section class="new-products">
-    <h2>Newest Products</h2>
-</section>
