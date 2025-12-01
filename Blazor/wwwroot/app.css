@@ -13,7 +13,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -122,4 +122,44 @@ h1:focus {
     .new-products h2 {
         font-size: 2rem;
         margin-bottom: 20px;
+    }
+
+.bikes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.bike-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .bike-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+.bike-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.bike-info {
+    padding: 10px;
+}
+
+    .bike-info h4 {
+        margin: 0 0 5px 0;
+    }
+
+    .bike-info p {
+        margin: 2px 0;
+        font-size: 0.9rem;
+        color: #555;
     }
