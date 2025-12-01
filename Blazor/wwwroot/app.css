@@ -123,3 +123,122 @@ h1:focus {
         font-size: 2rem;
         margin-bottom: 20px;
     }
+
+/* Base navbar */
+.navbar {
+    height: 64px;
+    padding: 0 1rem;
+    background: #0f172a; /* deep slate */
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Brand */
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+}
+
+/* Nav container alignment */
+.collapse.navbar-collapse {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Nav links */
+.navbar-nav .nav-link {
+    color: #e5e7eb;
+    padding: 0 1rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease, background 0.2s ease;
+}
+
+    .navbar-nav .nav-link:hover,
+    .navbar-nav .nav-link:focus {
+        color: #26b050;
+        background: rgba(255,255,255,0.06);
+    }
+
+    /* Active link */
+    .navbar-nav .nav-link.active {
+        color: #26b050;
+        background: rgba(255,255,255,0.10);
+    }
+
+/* Dropdown toggle caret spacing */
+.navbar-nav .dropdown-toggle::after {
+    margin-left: 0.4rem;
+}
+
+/* Dropdown menu styling (dark, modern) */
+.dropdown-menu {
+    background: #111827; /* near-black */
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    border-radius: 10px;
+    padding: 0.5rem;
+}
+
+.dropdown-item {
+    color: #e5e7eb;
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+    .dropdown-item:hover,
+    .dropdown-item:focus {
+        color: #fff;
+        background: rgba(255,255,255,0.08);
+    }
+
+/* Right-side actions */
+.navbar .btn {
+    border-radius: 10px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.9rem;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    margin-left: 0.6rem;
+}
+
+.btn-primary {
+    background: #2563eb;
+    border: none;
+}
+
+    .btn-primary:hover {
+        background: #1e40af;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(37,99,235,0.35);
+    }
+
+.btn-outline-light {
+    border-color: rgba(255,255,255,0.35);
+    color: #fff;
+}
+
+    .btn-outline-light:hover {
+        background: rgba(255,255,255,0.15);
+    }
+
+/* Mobile toggler icon contrast */
+.navbar-toggler {
+    border-color: rgba(255,255,255,0.25);
+}
+
+.navbar-toggler-icon {
+    filter: invert(1);
+}
+
+/* Ensure dropdown aligns in navbar flow */
+.navbar-nav .dropdown-menu {
+    margin-top: 0; /* ties to link height */
+}
+
