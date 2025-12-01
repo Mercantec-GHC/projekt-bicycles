@@ -14,48 +14,17 @@ namespace Blazor.Services
             _connectionString = connectionString;
         }
 
-        public List<Bike> GetAllBikes()
-        {
-            var bikes = new List<Bike>();
-
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand("SELECT * FROM bikes ORDER BY id LIMIT 20;", conn);
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                bikes.Add(new Bike
-                {
-                    Id = (int)reader["id"],
-                    Title = reader["title"].ToString(),
-                    Price = (decimal)reader["price"],
-                    UserId = (int)reader["user_id"],
-                    Color = reader["color"].ToString(),
-                    Type = reader["type"].ToString(),
-                    BikeCondition = reader["bike_condition"].ToString(),
-                    Brand = reader["brand"].ToString(),
-                    Location = reader["location"].ToString(),
-                    ImageUrl = reader["image_url"]?.ToString() ?? "", // <-- добавили считывание URL
-                    CreatedAt = (DateTime)reader["created_at"]
-                });
-            }
-
-            return bikes;
-        }
-
         public List<Bike> GetNewestBikes(int count = 8)
         {
             var bikes = new List<Bike>();
 
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
+            using var connection = new NpgsqlConnection(_connectionString);
+            connection.Open();
 
             string sql = $"SELECT * FROM bikes ORDER BY created_at DESC LIMIT {count};";
 
-            using var cmd = new NpgsqlCommand(sql, conn);
-            using var reader = cmd.ExecuteReader();
+            using var command = new NpgsqlCommand(sql, connection);
+            using var reader = command.ExecuteReader();
 
             while (reader.Read())
             {
@@ -70,7 +39,7 @@ namespace Blazor.Services
                     BikeCondition = reader["bike_condition"].ToString(),
                     Brand = reader["brand"].ToString(),
                     Location = reader["location"].ToString(),
-                    ImageUrl = reader["image_url"]?.ToString() ?? "", // <-- добавили считывание URL
+                    ImageUrl = reader["image_url"]?.ToString() ?? "",
                     CreatedAt = (DateTime)reader["created_at"]
                 });
             }

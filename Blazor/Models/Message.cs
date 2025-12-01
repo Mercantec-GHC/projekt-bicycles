@@ -7,6 +7,7 @@
         public int FromUserId { get; set; }
         public int ToUserId { get; set; }
         public string? Content { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         // user which sent the message
         public User? FromUser { get; set; }
@@ -16,6 +17,5 @@
 
         // bike related to the message
         public Bike? Bike { get; set; }
-        public DateTime CreatedAt { get; set; }
     }
 }
