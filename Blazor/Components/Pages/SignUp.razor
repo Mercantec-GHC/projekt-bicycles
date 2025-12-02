@@ -9,32 +9,27 @@
 
 <h3>Sign Up</h3>
 
-@if (!string.IsNullOrEmpty(Error))
-{
-    <div style="color:red">@Error</div>  <!-- Display error messages -->
-}
+<div class="signup-container">
+    @if (!string.IsNullOrEmpty(Error))
+    {
+        <div class="error-message">@Error</div>
+    }
 
-<!-- Input fields bound directly to string variables -->
-<input @bind="Name" placeholder="Name" />
-<br />
-<input @bind="Email" placeholder="Email" type="email" />
-<br />
-<input @bind="Password" placeholder="Password" type="password" />
-<br />
-<button @onclick="DoSignUp">Sign Up</button>  <!-- Trigger signup -->
+    <input class="signup-input" @bind="Name" placeholder="Name" />
+    <input class="signup-input" @bind="Email" placeholder="Email" type="email" />
+    <input class="signup-input" @bind="Password" placeholder="Password" type="password" />
+    <button class="signup-button" @onclick="DoSignUp">Sign Up</button>
+</div>
 
 @code {
-    string Name = "";     // Stores user-entered name
-    string Email = "";    // Stores user-entered email
-    string Password = ""; // Stores user-entered password
-    string Error = "";    // Stores error messages
+    string Name = "";
+    string Email = "";
+    string Password = "";
+    string Error = "";
 
-    // Sign up logic
     private async Task DoSignUp()
     {
-        Error = ""; // Reset error
-
-        // Manual validation
+        Error = "";
         if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
         {
             Error = "All fields are required";
@@ -44,11 +39,9 @@
         using var connection = new NpgsqlConnection(DbConfig.ConnectionString);
         await connection.OpenAsync();
 
-        // Check if email already exists
         using var checkCmd = new NpgsqlCommand("SELECT COUNT(*) FROM users WHERE email=@Email", connection);
         checkCmd.Parameters.AddWithValue("Email", Email);
-        var result = await checkCmd.ExecuteScalarAsync();// returns object
-        var count = Convert.ToInt64(result); // convert to long
+        var count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync());
 
         if (count > 0)
         {
@@ -56,7 +49,6 @@
             return;
         }
 
-        // Insert new user
         using var insertCmd = new NpgsqlCommand(
             "INSERT INTO users (name, email, password_hash, created_at) VALUES (@Name,@Email,@PasswordHash,@CreatedAt)",
             connection);
@@ -67,19 +59,17 @@
 
         await insertCmd.ExecuteNonQueryAsync();
 
-        // Log in the new user
         var authProvider = (SimpleDbAuthProvider)Auth;
         await authProvider.Login(Email, Password);
 
-        // Navigate to homepage
         NavigationManager.NavigateTo("/");
     }
 
-    // Hash password with SHA256
     private static string Hash(string input)
     {
         var bytes = System.Text.Encoding.UTF8.GetBytes(input);
         var hash = System.Security.Cryptography.SHA256.HashData(bytes);
-        return Convert.ToHexString(hash); // Convert to hexadecimal string
+        return Convert.ToHexString(hash);
     }
 }
+
