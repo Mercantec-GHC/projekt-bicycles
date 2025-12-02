@@ -1,14 +1,14 @@
 ﻿@page "/bikes"
-@inject BikeService BikeService
-@rendermode InteractiveServer
-@using Blazor.Services
+@inject BikeService BikeService // Inject the BikeService to access bike data from the database.
+@rendermode InteractiveServer //means the page will be interactive and run on the server, sending updates to the client.
+@using Blazor.Services 
 @using Blazor.Models
 
 <h3>Bikes</h3>
 
-<div class="filters mb-4">
+<div class="filters mb-4"> @*A container for filter inputs.*@
     <input placeholder="Brand"
-           @bind="brandFilter"
+           @bind="brandFilter" 
            @bind:event="oninput"
            @bind:after="LoadBikes"
            class="form-control mb-2" />

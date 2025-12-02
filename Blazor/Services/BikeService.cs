@@ -92,10 +92,10 @@ namespace Blazor.Services
 
         {
             var bikes = new List<Bike>();
-            using var conn = new NpgsqlConnection(_connectionString);
+            using var conn = new NpgsqlConnection(_connectionString); //using var ensures the connection is automatically closed and disposed when done
             conn.Open();
 
-            var sql = new StringBuilder("SELECT * FROM bikes WHERE 1=1");
+            var sql = new StringBuilder("SELECT * FROM bikes WHERE 1=1");// 1=1 is a common trick to simplify appending AND conditions
             var cmd = new NpgsqlCommand { Connection = conn };
 
             if (!string.IsNullOrEmpty(brand))
