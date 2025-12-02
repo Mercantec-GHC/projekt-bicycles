@@ -1,19 +1,12 @@
 ﻿using Blazor.Models;
 using Npgsql;
-using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Blazor.Services
 {
-    public class BikeService
+    public class BikeService(string connectionString)
     {
-        private readonly string _connectionString;
-
-        public BikeService(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
+        private readonly string _connectionString = connectionString;
 
         // 1. Get first 20 bikes (for general listing page)
         public List<Bike> GetAllBikes()

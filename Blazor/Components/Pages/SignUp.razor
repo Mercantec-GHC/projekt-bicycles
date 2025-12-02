@@ -1,48 +1,54 @@
 ﻿@page "/signup"
-@inject NavigationManager Nav
+@using Blazor.Services
 @using Microsoft.AspNetCore.Components.Authorization
+@using Npgsql
+
+@inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider Auth
-@using Npgsql;
-@using Blazor.Models;
 @inject Blazor.Services.DbConfig DbConfig
 
 <h3>Sign Up</h3>
 
 @if (!string.IsNullOrEmpty(Error))
 {
-    <div style="color:red">@Error</div>
+    <div style="color:red">@Error</div>  <!-- Display error messages -->
 }
 
+<!-- Input fields bound directly to string variables -->
 <input @bind="Name" placeholder="Name" />
 <br />
 <input @bind="Email" placeholder="Email" type="email" />
 <br />
 <input @bind="Password" placeholder="Password" type="password" />
 <br />
-<button @onclick="DoSignUp">Sign Up</button>
+<button @onclick="DoSignUp">Sign Up</button>  <!-- Trigger signup -->
 
 @code {
-    string Name = "";
-    string Email = "";
-    string Password = "";
-    string Error = "";
+    string Name = "";     // Stores user-entered name
+    string Email = "";    // Stores user-entered email
+    string Password = ""; // Stores user-entered password
+    string Error = "";    // Stores error messages
 
-    //private readonly string _connectionString = "Host=localhost;Database=BlazorDb;Username=postgres;Password=1234";
-
+    // Sign up logic
     private async Task DoSignUp()
     {
-        Error = "";
+        Error = ""; // Reset error
 
-        using var conn = new NpgsqlConnection(DbConfig.ConnectionString);
-        await conn.OpenAsync();
+        // Manual validation
+        if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        {
+            Error = "All fields are required";
+            return;
+        }
 
-        // Проверяем Email
-        using var checkCmd = new NpgsqlCommand(
-            "SELECT COUNT(*) FROM users WHERE email=@Email", conn);
+        using var connection = new NpgsqlConnection(DbConfig.ConnectionString);
+        await connection.OpenAsync();
+
+        // Check if email already exists
+        using var checkCmd = new NpgsqlCommand("SELECT COUNT(*) FROM users WHERE email=@Email", connection);
         checkCmd.Parameters.AddWithValue("Email", Email);
-        var result = await checkCmd.ExecuteScalarAsync();
-        var count = (result is not null) ? Convert.ToInt64(result) : 0L;
-        //var count = (long)await checkCmd.ExecuteScalarAsync();
+        var result = await checkCmd.ExecuteScalarAsync();// returns object
+        var count = Convert.ToInt64(result); // convert to long
 
         if (count > 0)
         {
@@ -50,9 +56,10 @@
             return;
         }
 
-        // Вставка пользователя
+        // Insert new user
         using var insertCmd = new NpgsqlCommand(
-            "INSERT INTO users (name, email, password_hash, created_at) VALUES (@Name,@Email,@PasswordHash,@CreatedAt)", conn);
+            "INSERT INTO users (name, email, password_hash, created_at) VALUES (@Name,@Email,@PasswordHash,@CreatedAt)",
+            connection);
         insertCmd.Parameters.AddWithValue("Name", Name);
         insertCmd.Parameters.AddWithValue("Email", Email);
         insertCmd.Parameters.AddWithValue("PasswordHash", Hash(Password));
@@ -60,17 +67,19 @@
 
         await insertCmd.ExecuteNonQueryAsync();
 
-        // Логиним пользователя
+        // Log in the new user
         var authProvider = (SimpleDbAuthProvider)Auth;
         await authProvider.Login(Email, Password);
 
-        Nav.NavigateTo("/");
+        // Navigate to homepage
+        NavigationManager.NavigateTo("/");
     }
 
+    // Hash password with SHA256
     private static string Hash(string input)
     {
         var bytes = System.Text.Encoding.UTF8.GetBytes(input);
         var hash = System.Security.Cryptography.SHA256.HashData(bytes);
-        return Convert.ToHexString(hash);
+        return Convert.ToHexString(hash); // Convert to hexadecimal string
     }
 }
