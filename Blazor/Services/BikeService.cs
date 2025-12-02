@@ -1,7 +1,5 @@
 ﻿using Blazor.Models;
 using Npgsql;
-using System;
-using System.Collections.Generic;
 
 namespace Blazor.Services
 {
@@ -30,6 +28,10 @@ namespace Blazor.Services
             {
                 bikes.Add(new Bike
                 {
+                    // Map database fields to Bike model properties
+                    // GetOrdinal is used to get the column index by name
+                    // This makes the code more resilient to changes in column order
+                    // GetInt32, GetString, GetDecimal, GetDateTime are used to get the value in the appropriate type
                     Id = reader.GetInt32(reader.GetOrdinal("id")),
                     Title = reader.GetString(reader.GetOrdinal("title")),
                     Price = reader.GetDecimal(reader.GetOrdinal("price")),

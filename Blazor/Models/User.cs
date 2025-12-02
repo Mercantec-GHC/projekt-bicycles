@@ -6,7 +6,7 @@
         public string? Name { get; set; }
         public string? Email { get; set; }
         public string? Phone { get; set; }
-        public string? PasswordHash { get; set; } // encryp
+        public string? PasswordHash { get; set; } 
         public DateTime CreatedAt { get; set; }
 
         // A user can have multiple bikes
