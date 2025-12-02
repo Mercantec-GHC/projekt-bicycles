@@ -30,17 +30,19 @@ namespace Blazor.Services
             {
                 bikes.Add(new Bike
                 {
-                    Id = (int)reader["id"],
-                    Title = reader["title"].ToString(),
-                    Price = (decimal)reader["price"],
-                    UserId = (int)reader["user_id"],
-                    Color = reader["color"].ToString(),
-                    Type = reader["type"].ToString(),
-                    BikeCondition = reader["bike_condition"].ToString(),
-                    Brand = reader["brand"].ToString(),
-                    Location = reader["location"].ToString(),
-                    ImageUrl = reader["image_url"]?.ToString() ?? "",
-                    CreatedAt = (DateTime)reader["created_at"]
+                    Id = reader.GetInt32(reader.GetOrdinal("id")),
+                    Title = reader.GetString(reader.GetOrdinal("title")),
+                    Price = reader.GetDecimal(reader.GetOrdinal("price")),
+                    UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
+                    Color = reader.GetString(reader.GetOrdinal("color")),
+                    Type = reader.GetString(reader.GetOrdinal("type")),
+                    BikeCondition = reader.GetString(reader.GetOrdinal("bike_condition")),
+                    Brand = reader.GetString(reader.GetOrdinal("brand")),
+                    Location = reader.GetString(reader.GetOrdinal("location")),
+                    ImageUrl = reader.IsDBNull(reader.GetOrdinal("image_url"))
+                                ? ""
+                                : reader.GetString(reader.GetOrdinal("image_url")),
+                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
                 });
             }
 
