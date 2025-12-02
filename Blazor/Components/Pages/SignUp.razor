@@ -1,0 +1,76 @@
+﻿@page "/signup"
+@inject NavigationManager Nav
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider Auth
+@using Npgsql;
+@using Blazor.Models;
+@inject Blazor.Services.DbConfig DbConfig
+
+<h3>Sign Up</h3>
+
+@if (!string.IsNullOrEmpty(Error))
+{
+    <div style="color:red">@Error</div>
+}
+
+<input @bind="Name" placeholder="Name" />
+<br />
+<input @bind="Email" placeholder="Email" type="email" />
+<br />
+<input @bind="Password" placeholder="Password" type="password" />
+<br />
+<button @onclick="DoSignUp">Sign Up</button>
+
+@code {
+    string Name = "";
+    string Email = "";
+    string Password = "";
+    string Error = "";
+
+    //private readonly string _connectionString = "Host=localhost;Database=BlazorDb;Username=postgres;Password=1234";
+
+    private async Task DoSignUp()
+    {
+        Error = "";
+
+        using var conn = new NpgsqlConnection(DbConfig.ConnectionString);
+        await conn.OpenAsync();
+
+        // Проверяем Email
+        using var checkCmd = new NpgsqlCommand(
+            "SELECT COUNT(*) FROM users WHERE email=@Email", conn);
+        checkCmd.Parameters.AddWithValue("Email", Email);
+        var result = await checkCmd.ExecuteScalarAsync();
+        var count = (result is not null) ? Convert.ToInt64(result) : 0L;
+        //var count = (long)await checkCmd.ExecuteScalarAsync();
+
+        if (count > 0)
+        {
+            Error = "Email already registered";
+            return;
+        }
+
+        // Вставка пользователя
+        using var insertCmd = new NpgsqlCommand(
+            "INSERT INTO users (name, email, password_hash, created_at) VALUES (@Name,@Email,@PasswordHash,@CreatedAt)", conn);
+        insertCmd.Parameters.AddWithValue("Name", Name);
+        insertCmd.Parameters.AddWithValue("Email", Email);
+        insertCmd.Parameters.AddWithValue("PasswordHash", Hash(Password));
+        insertCmd.Parameters.AddWithValue("CreatedAt", DateTime.UtcNow);
+
+        await insertCmd.ExecuteNonQueryAsync();
+
+        // Логиним пользователя
+        var authProvider = (SimpleDbAuthProvider)Auth;
+        await authProvider.Login(Email, Password);
+
+        Nav.NavigateTo("/");
+    }
+
+    private static string Hash(string input)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(input);
+        var hash = System.Security.Cryptography.SHA256.HashData(bytes);
+        return Convert.ToHexString(hash);
+    }
+}
