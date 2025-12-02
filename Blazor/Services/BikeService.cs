@@ -14,7 +14,7 @@ namespace Blazor.Services
             _connectionString = connectionString;
         }
 
-        public List<Bike> GetNewestBikes(int count = 10)
+        public List<Bike> GetNewestBikes(int count = 8)
         {
             var bikes = new List<Bike>();
 

@@ -242,3 +242,56 @@ h1:focus {
     margin-top: 0; /* ties to link height */
 }
 
+ 
+/* ===== Bikes Grid ===== */
+.bikes-container {
+    margin: 30px auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 25px;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+/* ===== Card ===== */
+.bike-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+    .bike-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+
+/* ===== Image ===== */
+.bike-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+/* ===== Info Section ===== */
+.bike-info {
+    padding: 15px;
+}
+
+    .bike-info h4 {
+        margin: 0 0 8px 0;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #222;
+    }
+
+    .bike-info p {
+        margin: 3px 0;
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+ 
