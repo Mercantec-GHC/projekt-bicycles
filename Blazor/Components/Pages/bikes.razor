@@ -1,0 +1,128 @@
+﻿@page "/bikes"
+@inject BikeService BikeService
+@rendermode InteractiveServer
+@using Blazor.Services
+@using Blazor.Models
+
+<h3>Bikes</h3>
+
+<div class="filters mb-4">
+    <input placeholder="Brand"
+           @bind="brandFilter"
+           @bind:event="oninput"
+           @bind:after="LoadBikes"
+           class="form-control mb-2" />
+    <input placeholder="Type"
+           @bind="typeFilter"
+           @bind:event="oninput"
+           @bind:after="LoadBikes"
+           class="form-control mb-2" />
+    <input type="number"
+           placeholder="Max Price"
+           @bind="maxPriceFilter"
+           @bind:event="oninput"
+           @bind:after="LoadBikes"
+           class="form-control mb-2" />
+    <input type="number"
+           placeholder="Model Year"
+           @bind="modelYearFilter"
+           @bind:event="oninput"
+           @bind:after="LoadBikes"
+           class="form-control mb-2" />
+    <input placeholder="Color"
+           @bind="colorFilter"
+           @bind:event="oninput"
+           @bind:after="LoadBikes"
+           class="form-control mb-2" />
+
+    <input placeholder="Location"
+           @bind="locationFilter"
+           @bind:event="oninput"
+           @bind:after="LoadBikes"
+           class="form-control mb-2" />
+
+    <select @bind="conditionFilter"
+            @bind:event="onchange"
+            @bind:after="LoadBikes"
+            class="form-control mb-2">
+        <option value="">All Conditions</option>
+        <option value="New">New</option>
+        <option value="Used">Used</option>
+    </select>
+</div>
+
+@if (bikeList == null)
+{
+    <p>Loading bikes...</p>
+}
+else if (!bikeList.Any())
+{
+    <p>No bikes found matching these filters.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var bike in bikeList)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    @if (!string.IsNullOrEmpty(bike.ImageUrl))
+                    {
+                        <img src="@bike.ImageUrl" class="card-img-top" alt="@bike.Title" />
+                    }
+                    <div class="card-body">
+                        <h5 class="card-title">@bike.Title</h5>
+                        <p class="card-text">
+                            <strong>Brand:</strong> @bike.Brand <br />
+                            <strong>Type:</strong> @bike.Type <br />
+                            <strong>Price:</strong> @bike.Price.ToString("C") <br />
+                            <strong>Model Year:</strong> @bike.ModelYear <br />
+                            <strong>Color:</strong> @bike.Color <br />
+                            <strong>Gear Type:</strong> @bike.GearType <br />
+                            <strong>Brake Type:</strong> @bike.BreakType <br />
+                            <strong>Weight:</strong> @bike.Weight kg <br />
+                            <strong>Condition:</strong> @bike.BikeCondition <br />
+                            <strong>Location:</strong> @bike.Location <br />
+                            <strong>Posted by:</strong> @bike.User?.Name
+                        </p>
+                        @if (!string.IsNullOrEmpty(bike.Description))
+                        {
+                            <p><em>@bike.Description</em></p>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<Bike>? bikeList;
+
+    private string brandFilter = string.Empty;
+    private string typeFilter = string.Empty;
+    private decimal? maxPriceFilter;
+    private int? modelYearFilter;
+    private string conditionFilter = string.Empty;
+    private string colorFilter = string.Empty;
+    private string locationFilter = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        LoadBikes();
+    }
+
+    private void LoadBikes()
+    {
+        bikeList = BikeService.GetBikes(
+            brandFilter,
+            typeFilter,
+            colorFilter,      
+            locationFilter,
+            maxPriceFilter,
+            modelYearFilter,
+            conditionFilter
+        );
+    }
+}
+
