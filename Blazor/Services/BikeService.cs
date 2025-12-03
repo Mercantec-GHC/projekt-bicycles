@@ -169,29 +169,29 @@ namespace Blazor.Services
             string? imageUrl = null;
             if (imageFile != null)
             {
-                var uploads = Path.Combine("wwwroot/uploads");
-                if (!Directory.Exists(uploads))
-                    Directory.CreateDirectory(uploads);
+                var uploads = Path.Combine("wwwroot/uploads"); //uploads sets the folder path where images will be saved.
+                if (!Directory.Exists(uploads)) //Checks if the uploads directory exists.
+                    Directory.CreateDirectory(uploads); //Creates the uploads directory if it doesn't exist.
 
-                var fileName = Path.GetFileName(imageFile.Name);
-                var filePath = Path.Combine(uploads, fileName);
+                var fileName = Path.GetFileName(imageFile.Name); //extracts the original file name of the uploaded image.
+                var filePath = Path.Combine(uploads, fileName);//combines the uploads folder and file name into a full path for saving the file.
 
-                await using var stream = File.Create(filePath);
-                await imageFile.OpenReadStream().CopyToAsync(stream);
+                await using var stream = File.Create(filePath);// opens a write stream to create the file on disk.
+                await imageFile.OpenReadStream().CopyToAsync(stream); //copies the contents of the uploaded image into the created file.
 
-                imageUrl = $"/uploads/{fileName}";
+                imageUrl = $"/uploads/{fileName}"; //sets the URL path to access the uploaded image.
             }
-
-            var sql = @"
+            //SQL command that inserts a new bike record into the database.
+            var sql = @" 
                 INSERT INTO bikes 
                 (user_id, title, price, color, type, model_year, gear_type, break_type, weight, bike_condition, target_audience, material, brand, location, description, image_url, created_at)
                 VALUES 
                 (@userId, @title, @price, @color, @type, @modelYear, @gearType, @breakType, @weight, @bikeCondition, @targetAudience, @material, @brand, @location, @description, @imageUrl, @createdAt);
             ";
 
-            await using var cmd = new NpgsqlCommand(sql, conn);
+            await using var cmd = new NpgsqlCommand(sql, conn); // creates a new command with the SQL and connection.
             cmd.Parameters.AddWithValue("userId", bike.UserId);
-            cmd.Parameters.AddWithValue("title", bike.Title ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("title", bike.Title ?? (object)DBNull.Value); //if a property is null, so the database can store NULL.
             cmd.Parameters.AddWithValue("price", bike.Price);
             cmd.Parameters.AddWithValue("color", bike.Color ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("type", bike.Type ?? (object)DBNull.Value);
@@ -208,7 +208,7 @@ namespace Blazor.Services
             cmd.Parameters.AddWithValue("imageUrl", imageUrl ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("createdAt", DateTime.Now);
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(); //Executes the insert command asynchronously.
         }
     }
 }
