@@ -13,57 +13,57 @@
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div>
-        <label>Title:</label>
-        <InputText @bind-Value="bike.Title" />
+    <div class="mb-3">
+        <label class="form-label">Title:</label>
+        <InputText @bind-Value="bike.Title" class="form-control" />
     </div>
 
-    <div>
-        <label>Price:</label>
-        <InputNumber @bind-Value="bike.Price" />
+    <div class="mb-3">
+        <label class="form-label">Price:</label>
+        <InputNumber @bind-Value="bike.Price" class="form-control" />
     </div>
 
-    <div>
-        <label>Brand:</label>
-        <InputText @bind-Value="bike.Brand" />
+    <div class="mb-3">
+        <label class="form-label">Brand:</label>
+        <InputText @bind-Value="bike.Brand" class="form-control" />
     </div>
 
-    <div>
-        <label>Type:</label>
-        <InputText @bind-Value="bike.Type" />
+    <div class="mb-3">
+        <label class="form-label">Type:</label>
+        <InputText @bind-Value="bike.Type" class="form-control" />
     </div>
 
-    <div>
-        <label>Color:</label>
-        <InputText @bind-Value="bike.Color" />
+    <div class="mb-3">
+        <label class="form-label">Color:</label>
+        <InputText @bind-Value="bike.Color" class="form-control" />
     </div>
 
-    <div>
-        <label>Model Year:</label>
-        <InputNumber @bind-Value="bike.ModelYear" />
+    <div class="mb-3">
+        <label class="form-label">Model Year:</label>
+        <InputNumber @bind-Value="bike.ModelYear" class="form-control" />
     </div>
 
-    <div>
-        <label>Condition:</label>
-        <InputText @bind-Value="bike.BikeCondition" />
+    <div class="mb-3">
+        <label class="form-label">Condition:</label>
+        <InputText @bind-Value="bike.BikeCondition" class="form-control" />
     </div>
 
-    <div>
-        <label>Location:</label>
-        <InputText @bind-Value="bike.Location" />
+    <div class="mb-3">
+        <label class="form-label">Location:</label>
+        <InputText @bind-Value="bike.Location" class="form-control" />
     </div>
 
-    <div>
-        <label>Description:</label>
-        <InputTextArea @bind-Value="bike.Description" />
+    <div class="mb-3">
+        <label class="form-label">Description:</label>
+        <InputTextArea @bind-Value="bike.Description" class="form-control" />
     </div>
 
-    <div>
-        <label>Image:</label>
-        <InputFile OnChange="HandleFileSelected" />
+    <div class="mb-3">
+        <label class="form-label">Image:</label>
+        <InputFile OnChange="HandleFileSelected" class="form-control" />
     </div>
 
-    <button type="submit">Create Ad</button>
+    <button type="submit" class="btn btn-primary">Create Ad</button>
 </EditForm>
 
 @code {
