@@ -74,8 +74,8 @@ namespace Blazor.Services
         }
 
         // 3. Get bikes with filters (for filter page)
-        public List<Bike> GetBikes(
-            string? brand = null, //
+        public List<Bike> GetBikes( //method that returns a list of Bike objects.
+            string? brand = null, //It accepts optional filters (nullable parameters). If a parameter is not provided, the filter is ignored.
             string? type = null,
             string? color = null,
             string? locationFilter = null,
@@ -84,16 +84,16 @@ namespace Blazor.Services
             string? condition = null)
 
         {
-            var bikes = new List<Bike>();
+            var bikes = new List<Bike>(); //Creates an empty list where all fetched bikes will be stored.
             using var conn = new NpgsqlConnection(_connectionString); //using var ensures the connection is automatically closed and disposed when done
             conn.Open();
 
             var sql = new StringBuilder("SELECT * FROM bikes WHERE 1=1");// 1=1 is a common trick to simplify appending AND conditions
             var cmd = new NpgsqlCommand { Connection = conn };
 
-            if (!string.IsNullOrEmpty(brand))
+            if (!string.IsNullOrEmpty(brand)) //Each filter checks whether a parameter has value before adding SQL conditions.
             {
-                sql.Append(" AND brand ILIKE @brand"); //
+                sql.Append(" AND brand ILIKE @brand"); //Adds a case-insensitive filter (ILIKE) to SQL.
                 cmd.Parameters.AddWithValue("brand", $"%{brand}%");
             }
 
@@ -136,12 +136,12 @@ namespace Blazor.Services
             sql.Append(" ORDER BY created_at DESC LIMIT 50");
             cmd.CommandText = sql.ToString();
 
-            using var reader = cmd.ExecuteReader();
+            using var reader = cmd.ExecuteReader(); //fetch data from the database.
             while (reader.Read())
             {
                 bikes.Add(new Bike
                 {
-                    Id = (int)reader["id"],
+                    Id = (int)reader["id"],  //Reads fields directly from the database row.
                     Title = reader["title"].ToString(),
                     Price = (decimal)reader["price"],
                     UserId = (int)reader["user_id"],
