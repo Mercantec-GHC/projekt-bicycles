@@ -3,6 +3,7 @@
 @rendermode InteractiveServer //means the page will be interactive and run on the server, sending updates to the client.
 @using Blazor.Services 
 @using Blazor.Models
+@inject NavigationManager NavigationManager
 
 <h3>Bikes</h3>
 
@@ -123,6 +124,12 @@ else
             modelYearFilter,
             conditionFilter
         );
+    }
+    public Bike Bike { get; set; }
+    
+    private void OpenSalesCard()
+    {
+        NavigationManager.NavigateTo($"/saledetail{Bike.Id}");
     }
 }
 

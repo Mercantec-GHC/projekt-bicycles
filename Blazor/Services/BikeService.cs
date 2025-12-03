@@ -41,6 +41,36 @@ namespace Blazor.Services
             return bikes;
         }
 
+        public async Task<Bike> GetBikeById(int id)
+        {
+            using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using var cmd = new NpgsqlCommand("SELECT * FROM bikes WHERE id = @id;", conn);
+            cmd.Parameters.AddWithValue("id", id);
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                return new Bike
+                {
+                    Id = (int)reader["id"],
+                    Title = reader["title"].ToString(),
+                    Price = (decimal)reader["price"],
+                    UserId = (int)reader["user_id"],
+                    Color = reader["color"].ToString(),
+                    Type = reader["type"].ToString(),
+                    BikeCondition = reader["bike_condition"].ToString(),
+                    Brand = reader["brand"].ToString(),
+                    Location = reader["location"].ToString(),
+                    GearType = "Unknown",
+                    ImageUrl = reader["image_url"]?.ToString() ?? "",
+                    CreatedAt = (DateTime)reader["created_at"]
+                };
+            }
+            return null;
+        }
+
         // 2. Get newest bikes (for homepage / carousel etc.)
         public List<Bike> GetNewestBikes(int count = 8)
         {
