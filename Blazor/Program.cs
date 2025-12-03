@@ -1,7 +1,6 @@
-using Blazor.Models;                  // Include the Models namespace (for SimpleDbAuthProvider, etc.)
-using Blazor.Components;              // Include Blazor Components namespace
-using Blazor.Services;                // Include Services namespace (BikeService, DbConfig)
-using Microsoft.AspNetCore.Components.Authorization; // Include Blazor authorization types (AuthenticationStateProvider)
+﻿using Blazor.Components;                           // Components namespace
+using Blazor.Services;                              // Application services (BikeService, DbConfig)
+using Microsoft.AspNetCore.Components.Authorization; // Blazor authentication/authorization types
 
 namespace Blazor
 {
@@ -9,54 +8,58 @@ namespace Blazor
     {
         public static void Main(string[] args)
         {
-            // Create a new WebApplicationBuilder which sets up the app configuration, logging, and services
+            // Create the WebApplicationBuilder which configures logging, DI services, and middleware
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services required for interactive Blazor Server components
+            // Add Razor Components and enable interactive Blazor Server functionality
             builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
-            // Get the connection string from appsettings.json (DefaultConnection)
+            // Retrieve database connection string from appsettings.json
             string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Database connection string is missing!"); // Throw error if missing
+                ?? throw new InvalidOperationException("Database connection string is missing!");
 
-            // Register BikeService as a singleton in DI container using the connection string
+            // Register BikeService as a singleton, passing the connection string
             builder.Services.AddSingleton(new BikeService(connectionString));
 
-            // Register DbConfig as a singleton so other components/services can access the connection string
+            // Register DbConfig so it can be injected anywhere the connection string is needed
             builder.Services.AddSingleton(new DbConfig(connectionString));
 
-            // Add core authorization services (required for AuthenticationStateProvider)
+            // Add basic authorization services required for AuthenticationStateProvider
             builder.Services.AddAuthorizationCore();
 
-            // Register the SimpleDbAuthProvider as the AuthenticationStateProvider in the DI container
+            // Register the custom authentication provider as scoped
+            // This defines how SimpleDbAuthProvider should be created
             builder.Services.AddScoped<SimpleDbAuthProvider>(sp => new SimpleDbAuthProvider(connectionString));
 
+            // Tell DI that AuthenticationStateProvider = our SimpleDbAuthProvider instance
             builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<SimpleDbAuthProvider>());
 
-
-            // Build the WebApplication pipeline
+            // Build the application with configured services
             var app = builder.Build();
 
-            // Configure error handling and HSTS for production environments
+            // Configure error handling for production
             if (!app.Environment.IsDevelopment())
             {
-                app.UseExceptionHandler("/Error"); // Show custom error page
-                app.UseHsts();                     // Enable HTTP Strict Transport Security
+                // Use a custom error page instead of a full stack trace
+                app.UseExceptionHandler("/Error");
+
+                // Enable HTTP Strict Transport Security
+                app.UseHsts();
             }
 
-            // Show a custom page for HTTP status codes like 404
+            // Provide custom pages for HTTP status codes (404 → /not-found)
             app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 
-            // Redirect HTTP requests to HTTPS
+            // Redirect all HTTP requests to HTTPS
             app.UseHttpsRedirection();
 
             // Enable antiforgery protection for forms
             app.UseAntiforgery();
 
-            // Serve static files (CSS, JS, images)
+            // Serve static files from wwwroot (CSS, JS, images, etc.)
             app.MapStaticAssets();
 
-            // Map Blazor components for server-side rendering
+            // Map the Blazor components and enable interactive server-side rendering
             app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
             // Start the application

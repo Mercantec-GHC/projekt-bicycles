@@ -1,31 +1,37 @@
 ﻿@page "/"
 @using Blazor.Models
 @using Blazor.Services
-@inject BikeService BikeService // Inject the BikeService to fetch bike data .
-@rendermode InteractiveServer
+@inject BikeService BikeService // Inject the BikeService to fetch bike data
+@rendermode InteractiveServer  // Enable interactive Blazor Server rendering
 
+<!-- Hero section with a background video -->
 <header class="hero-section">
     <video autoplay loop muted playsinline class="hero-video">
         <source src="videos/bikeshop.mp4" type="video/mp4">
     </video>
 
-    <div class="hero-overlay"></div>
+    <div class="hero-overlay"></div> <!-- Dark overlay for better text readability -->
 
     <div class="hero-content">
         <h1>Welcome</h1>
         <p>Discover bikes for every ride</p>
     </div>
 </header>
- 
+
+<!-- Section for newest bike products -->
 <section class="new-products">
     <h2>Newest Products</h2>
 </section>
 
+<!-- Display newest bikes in a card layout -->
 <div class="bikes-container">
     @foreach (var bike in NewestBikes)
     {
         <div class="bike-card">
+            <!-- Bike image -->
             <img src="@bike.ImageUrl" alt="@bike.Title" class="bike-image" />
+
+            <!-- Bike information -->
             <div class="bike-info">
                 <h4>@bike.Title</h4>
                 <p>Price: @bike.Price kr</p>
@@ -39,11 +45,11 @@
 </div>
 
 @code {
-    private List<Bike> NewestBikes = new List<Bike>();
+    private List<Bike> NewestBikes = new List<Bike>(); // List to store newest bikes
 
     protected override void OnInitialized()
     {
+        // Fetch newest bikes from BikeService when component initializes
         NewestBikes = BikeService.GetNewestBikes();
     }
 }
-

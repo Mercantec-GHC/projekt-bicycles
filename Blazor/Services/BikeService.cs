@@ -1,15 +1,18 @@
-﻿using Blazor.Models;
-using Microsoft.AspNetCore.Components.Forms;
-using Npgsql;
-using System.Text;
+﻿using Blazor.Models;                      // Contains Bike model class
+using Microsoft.AspNetCore.Components.Forms; // For IBrowserFile
+using Npgsql;                             // PostgreSQL data provider
+using System.Text;                        // For building dynamic SQL strings
 
 namespace Blazor.Services
 {
+    // BikeService handles all database operations related to bikes
     public class BikeService(string connectionString)
     {
         private readonly string _connectionString = connectionString;
 
-        // 1. Get first 20 bikes (for general listing page)
+        // ------------------------------------------------------------
+        // 1. Get first 20 bikes (used in general listing pages)
+        // ------------------------------------------------------------
         public List<Bike> GetAllBikes()
         {
             var bikes = new List<Bike>();
@@ -19,6 +22,7 @@ namespace Blazor.Services
             using var cmd = new NpgsqlCommand("SELECT * FROM bikes ORDER BY id LIMIT 20;", conn);
             using var reader = cmd.ExecuteReader();
 
+            // Read each record and map to a Bike object
             while (reader.Read())
             {
                 bikes.Add(new Bike
@@ -32,7 +36,7 @@ namespace Blazor.Services
                     BikeCondition = reader["bike_condition"].ToString(),
                     Brand = reader["brand"].ToString(),
                     Location = reader["location"].ToString(),
-                    GearType = "Unknown",
+                    GearType = "Unknown", // Placeholder
                     ImageUrl = reader["image_url"]?.ToString() ?? "",
                     CreatedAt = (DateTime)reader["created_at"]
                 });
@@ -41,15 +45,20 @@ namespace Blazor.Services
             return bikes;
         }
 
-        public async Task<Bike> GetBikeById(int id)
+        // ------------------------------------------------------------
+        // 2. Get a single bike by its ID (for detailed view page)
+        // ------------------------------------------------------------
+        public async Task<Bike?> GetBikeById(int id)
         {
             using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
             using var cmd = new NpgsqlCommand("SELECT * FROM bikes WHERE id = @id;", conn);
             cmd.Parameters.AddWithValue("id", id);
+
             using var reader = await cmd.ExecuteReaderAsync();
 
+            // If a record exists → map it to Bike
             if (await reader.ReadAsync())
             {
                 return new Bike
@@ -68,10 +77,13 @@ namespace Blazor.Services
                     CreatedAt = (DateTime)reader["created_at"]
                 };
             }
-            return null;
+
+            return null; // No bike found
         }
 
-        // 2. Get newest bikes (for homepage / carousel etc.)
+        // ------------------------------------------------------------
+        // 3. Get newest bikes (for homepage, sliders, carousel, etc.)
+        // ------------------------------------------------------------
         public List<Bike> GetNewestBikes(int count = 8)
         {
             var bikes = new List<Bike>();
@@ -104,27 +116,32 @@ namespace Blazor.Services
             return bikes;
         }
 
-        // 3. Get bikes with filters (for filter page)
-        public List<Bike> GetBikes( //method that returns a list of Bike objects.
-            string? brand = null, //It accepts optional filters (nullable parameters). If a parameter is not provided, the filter is ignored.
+        // ------------------------------------------------------------
+        // 4. Get bikes using advanced filters (brand, color, etc.)
+        //    Used in the filtering/search page
+        // ------------------------------------------------------------
+        public List<Bike> GetBikes(
+            string? brand = null,
             string? type = null,
             string? color = null,
             string? locationFilter = null,
             decimal? maxPrice = null,
             int? modelYear = null,
             string? condition = null)
-
         {
-            var bikes = new List<Bike>(); //Creates an empty list where all fetched bikes will be stored.
-            using var conn = new NpgsqlConnection(_connectionString); //using var ensures the connection is automatically closed and disposed when done
+            var bikes = new List<Bike>();
+
+            using var conn = new NpgsqlConnection(_connectionString);
             conn.Open();
 
-            var sql = new StringBuilder("SELECT * FROM bikes WHERE 1=1");// 1=1 is a common trick to simplify appending AND conditions
+            // Start building dynamic SQL query
+            var sql = new StringBuilder("SELECT * FROM bikes WHERE 1=1");
             var cmd = new NpgsqlCommand { Connection = conn };
 
-            if (!string.IsNullOrEmpty(brand)) //Each filter checks whether a parameter has value before adding SQL conditions.
+            // Conditionally append filters
+            if (!string.IsNullOrEmpty(brand))
             {
-                sql.Append(" AND brand ILIKE @brand"); //Adds a case-insensitive filter (ILIKE) to SQL.
+                sql.Append(" AND brand ILIKE @brand");
                 cmd.Parameters.AddWithValue("brand", $"%{brand}%");
             }
 
@@ -133,6 +150,7 @@ namespace Blazor.Services
                 sql.Append(" AND type ILIKE @type");
                 cmd.Parameters.AddWithValue("type", type);
             }
+
             if (!string.IsNullOrEmpty(color))
             {
                 sql.Append(" AND color ILIKE @color");
@@ -144,7 +162,6 @@ namespace Blazor.Services
                 sql.Append(" AND location ILIKE @location");
                 cmd.Parameters.AddWithValue("location", $"%{locationFilter}%");
             }
-
 
             if (maxPrice.HasValue)
             {
@@ -164,15 +181,17 @@ namespace Blazor.Services
                 cmd.Parameters.AddWithValue("condition", condition);
             }
 
+            // Limit to 50 results to avoid huge datasets
             sql.Append(" ORDER BY created_at DESC LIMIT 50");
             cmd.CommandText = sql.ToString();
 
-            using var reader = cmd.ExecuteReader(); //fetch data from the database.
+            using var reader = cmd.ExecuteReader();
+
             while (reader.Read())
             {
                 bikes.Add(new Bike
                 {
-                    Id = (int)reader["id"],  //Reads fields directly from the database row.
+                    Id = (int)reader["id"],
                     Title = reader["title"].ToString(),
                     Price = (decimal)reader["price"],
                     UserId = (int)reader["user_id"],
@@ -190,38 +209,53 @@ namespace Blazor.Services
 
             return bikes;
         }
-    
-            public async Task CreateAdAsync(Bike bike, IBrowserFile? imageFile = null)
+
+        // ------------------------------------------------------------
+        // 5. Create a new bike advertisement, optionally with image upload
+        // ------------------------------------------------------------
+        public async Task CreateAdAsync(Bike bike, IBrowserFile? imageFile = null)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
             string? imageUrl = null;
+
+            // Handle image upload if provided
             if (imageFile != null)
             {
-                var uploads = Path.Combine("wwwroot/uploads"); //uploads sets the folder path where images will be saved.
-                if (!Directory.Exists(uploads)) //Checks if the uploads directory exists.
-                    Directory.CreateDirectory(uploads); //Creates the uploads directory if it doesn't exist.
+                var uploads = Path.Combine("wwwroot/uploads");
 
-                var fileName = Path.GetFileName(imageFile.Name); //extracts the original file name of the uploaded image.
-                var filePath = Path.Combine(uploads, fileName);//combines the uploads folder and file name into a full path for saving the file.
+                // Create upload directory if missing
+                if (!Directory.Exists(uploads))
+                    Directory.CreateDirectory(uploads);
 
-                await using var stream = File.Create(filePath);// opens a write stream to create the file on disk.
-                await imageFile.OpenReadStream().CopyToAsync(stream); //copies the contents of the uploaded image into the created file.
+                // Extract file name and full path
+                var fileName = Path.GetFileName(imageFile.Name);
+                var filePath = Path.Combine(uploads, fileName);
 
-                imageUrl = $"/uploads/{fileName}"; //sets the URL path to access the uploaded image.
+                // Save file to disk
+                await using var stream = File.Create(filePath);
+                await imageFile.OpenReadStream().CopyToAsync(stream);
+
+                // Public URL for the image
+                imageUrl = $"/uploads/{fileName}";
             }
-            //SQL command that inserts a new bike record into the database.
-            var sql = @" 
+
+            // SQL command for creating a new bike record
+            var sql = @"
                 INSERT INTO bikes 
-                (user_id, title, price, color, type, model_year, gear_type, break_type, weight, bike_condition, target_audience, material, brand, location, description, image_url, created_at)
+                (user_id, title, price, color, type, model_year, gear_type, break_type, weight, bike_condition, 
+                 target_audience, material, brand, location, description, image_url, created_at)
                 VALUES 
-                (@userId, @title, @price, @color, @type, @modelYear, @gearType, @breakType, @weight, @bikeCondition, @targetAudience, @material, @brand, @location, @description, @imageUrl, @createdAt);
+                (@userId, @title, @price, @color, @type, @modelYear, @gearType, @breakType, @weight, @bikeCondition, 
+                 @targetAudience, @material, @brand, @location, @description, @imageUrl, @createdAt);
             ";
 
-            await using var cmd = new NpgsqlCommand(sql, conn); // creates a new command with the SQL and connection.
+            await using var cmd = new NpgsqlCommand(sql, conn);
+
+            // Add parameters safely (avoid SQL injection, handle nulls)
             cmd.Parameters.AddWithValue("userId", bike.UserId);
-            cmd.Parameters.AddWithValue("title", bike.Title ?? (object)DBNull.Value); //if a property is null, so the database can store NULL.
+            cmd.Parameters.AddWithValue("title", bike.Title ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("price", bike.Price);
             cmd.Parameters.AddWithValue("color", bike.Color ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("type", bike.Type ?? (object)DBNull.Value);
@@ -238,7 +272,8 @@ namespace Blazor.Services
             cmd.Parameters.AddWithValue("imageUrl", imageUrl ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("createdAt", DateTime.Now);
 
-            await cmd.ExecuteNonQueryAsync(); //Executes the insert command asynchronously.
+            // Execute the insert command asynchronously
+            await cmd.ExecuteNonQueryAsync();
         }
     }
 }

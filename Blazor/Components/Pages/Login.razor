@@ -3,47 +3,58 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Npgsql
 
-@inject NavigationManager NavigationManager
-@inject AuthenticationStateProvider Auth
-@inject Blazor.Services.DbConfig DbConfig
+@inject NavigationManager NavigationManager     // Used to redirect user
+@inject AuthenticationStateProvider Auth        // Injected auth provider (base type)
+@inject Blazor.Services.DbConfig DbConfig       // Injected DB configuration (if needed)
 
 <h3>Login</h3>
 
 <div class="signup-container">
     @if (!string.IsNullOrEmpty(Error))
     {
+        <!-- Display login error -->
         <div class="error-message">@Error</div>
     }
 
+    <!-- Email input -->
     <input class="signup-input" @bind="Email" placeholder="Email" type="email" />
+
+    <!-- Password input -->
     <input class="signup-input" @bind="Password" placeholder="Password" type="password" />
+
+    <!-- Login button -->
     <button class="signup-button" @onclick="DoLogin">Login</button>
 </div>
 
 @code {
-    string Email = "";
-    string Password = "";
-    string Error = "";
+    string Email = "";       // Holds entered email
+    string Password = "";    // Holds entered password
+    string Error = "";       // Stores validation or login errors
 
     private async Task DoLogin()
     {
         Error = "";
 
+        // Basic client-side validation
         if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
         {
             Error = "Enter email and password";
             return;
         }
 
+        // Cast the injected provider to your custom one
         var authProvider = (SimpleDbAuthProvider)Auth;
+
+        // Try to authenticate user
         var ok = await authProvider.Login(Email, Password);
 
         if (!ok)
         {
-            Error = "Invalid email or password";
+            Error = "Invalid email or password";   // Show error on wrong credentials
             return;
         }
 
+        // Redirect to homepage after successful login
         NavigationManager.NavigateTo("/");
     }
 }

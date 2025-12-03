@@ -2,15 +2,20 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Blazor.Services
 
-@inject SimpleDbAuthProvider Auth
-@inject NavigationManager Nav
+@inject SimpleDbAuthProvider Auth      // Inject custom authentication provider
+@inject NavigationManager Nav          // Inject navigation helper
 
+<!-- Main navigation bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary align-items-center">
     <div class="container-fluid">
+        <!-- Brand / Home link -->
         <a class="navbar-brand" href="/">ReRide</a>
 
+        <!-- Left-side navigation links -->
         <div class="navbar-nav me-auto">
             <a class="nav-link" href="/bikes">Bikes</a>
+
+            <!-- Example dropdown menu -->
             <div class="dropdown">
                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Bikes</a>
                 <ul class="dropdown-menu">
@@ -19,13 +24,22 @@
             </div>
         </div>
 
+        <!-- Right-side section (auth controls) -->
         <div class="d-flex">
             <AuthorizeView>
+                <!-- Shown when user is authenticated -->
                 <Authorized Context="authContext">
+                    <!-- Display logged-in username -->
                     <span class="navbar-text me-2">Welcome, @authContext.User.Identity?.Name</span>
-                    <NavLink class="btn  btn-success" href="/create-ad">Sell bike</NavLink>
-                    <button class="btn  btn-danger" @onclick="DoLogout">Logout</button>
+
+                    <!-- Link to create a new bike ad -->
+                    <NavLink class="btn btn-success" href="/create-ad">Sell bike</NavLink>
+
+                    <!-- Logout button -->
+                    <button class="btn btn-danger" @onclick="DoLogout">Logout</button>
                 </Authorized>
+
+                <!-- Shown when user is NOT authenticated -->
                 <NotAuthorized>
                     <NavLink class="btn btn-light" href="/login">Login</NavLink>
                     <NavLink class="btn btn-warning" href="/signup">Sign Up</NavLink>
@@ -35,14 +49,16 @@
     </div>
 </nav>
 
+<!-- Main page content -->
 <div class="page-content container mt-4">
     @Body
 </div>
 
 @code {
+    // Handles logout action, clears auth state and redirects home
     private void DoLogout()
     {
-        Auth.Logout();
-        Nav.NavigateTo("/");
+        Auth.Logout();       // Clear authentication session
+        Nav.NavigateTo("/"); // Redirect to homepage
     }
 }
