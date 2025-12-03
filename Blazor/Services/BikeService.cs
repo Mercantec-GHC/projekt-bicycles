@@ -1,4 +1,5 @@
 ﻿using Blazor.Models;
+using Microsoft.AspNetCore.Components.Forms;
 using Npgsql;
 using System.Text;
 
@@ -80,7 +81,7 @@ namespace Blazor.Services
             string? color = null,
             string? locationFilter = null,
             decimal? maxPrice = null,
-            int? modelYear = null,       
+            int? modelYear = null,
             string? condition = null)
 
         {
@@ -111,7 +112,7 @@ namespace Blazor.Services
             if (!string.IsNullOrEmpty(locationFilter))
             {
                 sql.Append(" AND location ILIKE @location");
-                cmd.Parameters.AddWithValue("location", $"%{locationFilter}%"); 
+                cmd.Parameters.AddWithValue("location", $"%{locationFilter}%");
             }
 
 
@@ -159,6 +160,55 @@ namespace Blazor.Services
 
             return bikes;
         }
+    
+            public async Task CreateAdAsync(Bike bike, IBrowserFile? imageFile = null)
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            string? imageUrl = null;
+            if (imageFile != null)
+            {
+                var uploads = Path.Combine("wwwroot/uploads");
+                if (!Directory.Exists(uploads))
+                    Directory.CreateDirectory(uploads);
+
+                var fileName = Path.GetFileName(imageFile.Name);
+                var filePath = Path.Combine(uploads, fileName);
+
+                await using var stream = File.Create(filePath);
+                await imageFile.OpenReadStream().CopyToAsync(stream);
+
+                imageUrl = $"/uploads/{fileName}";
+            }
+
+            var sql = @"
+                INSERT INTO bikes 
+                (user_id, title, price, color, type, model_year, gear_type, break_type, weight, bike_condition, target_audience, material, brand, location, description, image_url, created_at)
+                VALUES 
+                (@userId, @title, @price, @color, @type, @modelYear, @gearType, @breakType, @weight, @bikeCondition, @targetAudience, @material, @brand, @location, @description, @imageUrl, @createdAt);
+            ";
+
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("userId", bike.UserId);
+            cmd.Parameters.AddWithValue("title", bike.Title ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("price", bike.Price);
+            cmd.Parameters.AddWithValue("color", bike.Color ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("type", bike.Type ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("modelYear", bike.ModelYear);
+            cmd.Parameters.AddWithValue("gearType", bike.GearType ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("breakType", bike.BreakType ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("weight", bike.Weight);
+            cmd.Parameters.AddWithValue("bikeCondition", bike.BikeCondition ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("targetAudience", bike.TargetAudience ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("material", bike.Material ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("brand", bike.Brand ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("location", bike.Location ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("description", bike.Description ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("imageUrl", imageUrl ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("createdAt", DateTime.Now);
+
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 }
-

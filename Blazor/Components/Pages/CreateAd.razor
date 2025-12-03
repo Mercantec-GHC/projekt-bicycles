@@ -1,5 +1,91 @@
-﻿<h3>CreateAd</h3>
+﻿@page "/create-ad"
+@inject BikeService BikeService 
+@using Blazor.Models
+@using Blazor.Services
+@inject NavigationManager Navigation
+
+
+@rendermode InteractiveServer
+
+<h3>Create Bike Ad</h3>
+
+<EditForm Model="@bike" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Title:</label>
+        <InputText @bind-Value="bike.Title" />
+    </div>
+
+    <div>
+        <label>Price:</label>
+        <InputNumber @bind-Value="bike.Price" />
+    </div>
+
+    <div>
+        <label>Brand:</label>
+        <InputText @bind-Value="bike.Brand" />
+    </div>
+
+    <div>
+        <label>Type:</label>
+        <InputText @bind-Value="bike.Type" />
+    </div>
+
+    <div>
+        <label>Color:</label>
+        <InputText @bind-Value="bike.Color" />
+    </div>
+
+    <div>
+        <label>Model Year:</label>
+        <InputNumber @bind-Value="bike.ModelYear" />
+    </div>
+
+    <div>
+        <label>Condition:</label>
+        <InputText @bind-Value="bike.BikeCondition" />
+    </div>
+
+    <div>
+        <label>Location:</label>
+        <InputText @bind-Value="bike.Location" />
+    </div>
+
+    <div>
+        <label>Description:</label>
+        <InputTextArea @bind-Value="bike.Description" />
+    </div>
+
+    <div>
+        <label>Image:</label>
+        <InputFile OnChange="HandleFileSelected" />
+    </div>
+
+    <button type="submit">Create Ad</button>
+</EditForm>
 
 @code {
+    private Bike bike = new Bike();
+    private IBrowserFile? imageFile;
 
+    private void HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        imageFile = e.File;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await BikeService.CreateAdAsync(bike, imageFile);
+            // Redirect to the bikes listing page or show success
+            Navigation.NavigateTo("/bikes");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error creating ad: " + ex.Message);
+        }
+    }
 }
