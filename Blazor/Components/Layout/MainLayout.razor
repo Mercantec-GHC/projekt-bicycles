@@ -23,7 +23,7 @@
             <AuthorizeView>
                 <Authorized Context="authContext">
                     <span class="navbar-text me-2">Welcome, @authContext.User.Identity?.Name</span>
-                    <NavLink class="btn  btn-success" href="/add-bike">Create</NavLink>
+                    <NavLink class="btn  btn-success" href="/create-ad">Create</NavLink>
                     <button class="btn  btn-danger" @onclick="DoLogout">Logout</button>
                 </Authorized>
                 <NotAuthorized>
