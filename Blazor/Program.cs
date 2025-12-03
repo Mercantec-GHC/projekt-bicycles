@@ -1,4 +1,4 @@
-using Blazor.Models;                  // Include the Models namespace (for SimpleDbAuthProvider, DbConfig, etc.)
+using Blazor.Models;                  // Include the Models namespace (for SimpleDbAuthProvider, etc.)
 using Blazor.Components;              // Include Blazor Components namespace
 using Blazor.Services;                // Include Services namespace (BikeService, DbConfig)
 using Microsoft.AspNetCore.Components.Authorization; // Include Blazor authorization types (AuthenticationStateProvider)
