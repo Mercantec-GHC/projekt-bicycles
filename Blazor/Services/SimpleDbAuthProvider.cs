@@ -38,11 +38,7 @@ namespace Blazor.Services
             var id = idObj.ToString() ?? "0";
 
             // Create claims identity for the logged-in user
-            var identity = new ClaimsIdentity(
-            [
-                new Claim(ClaimTypes.Name, email ?? ""), // User email claim
-                new Claim("UserId", id)                  // Custom user ID claim
-            ], "database"); // Authentication type
+            var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, email ?? ""), new Claim("UserId", id)], "database"); // Authentication type
 
             // Update the current user
             _currentUser = new ClaimsPrincipal(identity);
@@ -61,7 +57,7 @@ namespace Blazor.Services
         }
 
         // Hashes the password using SHA256
-        private static string Hash(string input)
+        private string Hash(string input)
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes(input); // Convert string to bytes
             var hash = System.Security.Cryptography.SHA256.HashData(bytes); // Compute SHA256 hash
