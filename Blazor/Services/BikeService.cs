@@ -82,7 +82,7 @@ namespace Blazor.Services
 
         // 3. Get bikes with filters (for filter page)
         public List<Bike> GetBikes(
-            string? brand = null,
+            string? brand = null, //
             string? type = null,
             string? color = null,
             string? locationFilter = null,
@@ -100,7 +100,7 @@ namespace Blazor.Services
 
             if (!string.IsNullOrEmpty(brand))
             {
-                sql.Append(" AND brand ILIKE @brand");
+                sql.Append(" AND brand ILIKE @brand"); //
                 cmd.Parameters.AddWithValue("brand", $"%{brand}%");
             }
 
@@ -118,7 +118,7 @@ namespace Blazor.Services
             if (!string.IsNullOrEmpty(locationFilter))
             {
                 sql.Append(" AND location ILIKE @location");
-                cmd.Parameters.AddWithValue("location", $"%{locationFilter}%");
+                cmd.Parameters.AddWithValue("location", $"%{locationFilter}%"); 
             }
 
 
