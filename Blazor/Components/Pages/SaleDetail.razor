@@ -1,28 +1,34 @@
-﻿@page "/bikes{id:int}"
+﻿@page "/saledetail/{id:int}"
 @using Blazor.Models
 @using Blazor.Services
 @rendermode InteractiveServer
-@inject BikeService bikeService
-@inject NavigationManager NavigationManager
-
-<h3>Sale Description</h3>
+@inject BikeService BikeService
 
 
-<div class="card" style="max-width:500px;">
-    <div class="card-body">
-        <h2></h2>
+<h3>Bike Details</h3>
+
+@if (bike == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div>
+        <h4>@bike.Title</h4>
+        <p><strong>Brand:</strong> @bike.Brand</p>
+        <p><strong>Price:</strong> @bike.Price.ToString("C")</p>
+        <p><strong>Description:</strong> @bike.Description</p>
+        <!-- Add more details as needed -->
     </div>
+}
 
-
-
-
-</div>
 @code {
-    public int id { get; set; }
+    [Parameter] public int id { get; set; }
     private Bike? bike;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
-        //bike = BikeService.GetBikeById(id);
+        bike = await BikeService.GetBikeById(id);   
     }
 }
+

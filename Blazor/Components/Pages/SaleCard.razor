@@ -1,0 +1,62 @@
+﻿@using System.Globalization
+@inherits OwningComponentBase
+@using Blazor.Services
+@using Blazor.Models
+@inject NavigationManager NavigationManager
+@rendermode InteractiveServer
+
+<div class="card" @onclick="@OpenSalesCard" style="cursor:pointer">
+    <div class="card-body">
+        <h4>@Bike.Title</h4>
+        <p>@Bike.Description</p>
+        <div class="card-footer">
+            <span class="pris">@Bike.Price.ToString("0.00", CultureInfo.InvariantCulture) kr.</span>
+            <span class="dato">@Bike.CreatedAt.ToString("dd-MM-yyyy HH:mm")</span>
+        </div>
+    </div>
+</div>
+@code {
+
+    [Parameter]
+    public Bike Bike { get; set; }
+
+    private void OpenSalesCard()
+    {
+        NavigationManager.NavigateTo($"/saledetail{Bike.Id}");
+    }
+}
+
+
+
+<style>
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 16px;
+        margin: 12px 0;
+        box-shadow: 1px 2px 12px rgba(0,0,0,0.06);
+        max-width: 400px;
+        background: #fafafa;
+    }
+
+    .card-body {
+        padding: 0;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 12px;
+        font-size: 0.95em;
+        color: #666;
+    }
+
+    .pris {
+        font-weight: bold;
+        color: #2a934f;
+    }
+
+    .dato {
+        font-style: italic;
+    }
+</style>
