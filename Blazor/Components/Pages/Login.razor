@@ -1,44 +1,49 @@
 ﻿@page "/login"
+@using Blazor.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using Npgsql
+
 @inject NavigationManager NavigationManager
-@rendermode InteractiveServer
+@inject AuthenticationStateProvider Auth
+@inject Blazor.Services.DbConfig DbConfig
 
 <h3>Login</h3>
 
-<p>Under Construction</p>
+<div class="signup-container">
+    @if (!string.IsNullOrEmpty(Error))
+    {
+        <div class="error-message">@Error</div>
+    }
 
-@*<div class="form-group">
-    <label for="email">Email:</label>
-    <input @bind="Email" class="form-control" />
+    <input class="signup-input" @bind="Email" placeholder="Email" type="email" />
+    <input class="signup-input" @bind="Password" placeholder="Password" type="password" />
+    <button class="signup-button" @onclick="DoLogin">Login</button>
 </div>
-
-<div class="form-group">
-    <label for="password">Password:</label>
-    <input type="password" @bind="Password" class="form-control" />
-</div>
-
-<button class="btn btn-primary" @onclick="HandleLogin">Login</button>
-
-@if (!string.IsNullOrEmpty(ErrorMessage))
-{
-    <div class="text-danger">@ErrorMessage</div>
-}
 
 @code {
-    private string? Email { get; set; }
-    private string? Password { get; set; }
-    private string? ErrorMessage { get; set; }
+    string Email = "";
+    string Password = "";
+    string Error = "";
 
-    private async Task HandleLogin()
+    private async Task DoLogin()
     {
-        // Simpel validering (kun demo)
-        if (Email == "admin" && Password == "1234")
-        {
-            NavigationManager.NavigateTo("/dashboard");
-        }
-        else
-        {
-            ErrorMessage = "Wrong Email or password!";
-        }
-    }
-}*@
+        Error = "";
 
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        {
+            Error = "Enter email and password";
+            return;
+        }
+
+        var authProvider = (SimpleDbAuthProvider)Auth;
+        var ok = await authProvider.Login(Email, Password);
+
+        if (!ok)
+        {
+            Error = "Invalid email or password";
+            return;
+        }
+
+        NavigationManager.NavigateTo("/");
+    }
+}

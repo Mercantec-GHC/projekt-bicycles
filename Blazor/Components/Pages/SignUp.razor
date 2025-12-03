@@ -49,9 +49,7 @@
             return;
         }
 
-        using var insertCmd = new NpgsqlCommand(
-            "INSERT INTO users (name, email, password_hash, created_at) VALUES (@Name,@Email,@PasswordHash,@CreatedAt)",
-            connection);
+        using var insertCmd = new NpgsqlCommand("INSERT INTO users (name, email, password_hash, created_at) VALUES (@Name,@Email,@PasswordHash,@CreatedAt)", connection);
         insertCmd.Parameters.AddWithValue("Name", Name);
         insertCmd.Parameters.AddWithValue("Email", Email);
         insertCmd.Parameters.AddWithValue("PasswordHash", Hash(Password));
