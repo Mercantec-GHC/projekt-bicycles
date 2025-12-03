@@ -29,7 +29,10 @@ namespace Blazor
             builder.Services.AddAuthorizationCore();
 
             // Register the SimpleDbAuthProvider as the AuthenticationStateProvider in the DI container
-            builder.Services.AddScoped<AuthenticationStateProvider>(sp => new SimpleDbAuthProvider(connectionString));
+            builder.Services.AddScoped<SimpleDbAuthProvider>(sp => new SimpleDbAuthProvider(connectionString));
+
+            builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<SimpleDbAuthProvider>());
+
 
             // Build the WebApplication pipeline
             var app = builder.Build();
