@@ -1,25 +1,23 @@
-﻿using Blazor.Models;
-using Npgsql;
+﻿using Blazor.Models; // Import the Bike, User, and Message models
+using Npgsql; // Import PostgreSQL connectivity
 
 namespace Blazor.Services
 {
-    public class MessageService
+    // Service responsible for sending and retrieving messages from the database
+    public class MessageService(string connectionString)
     {
-        private readonly string _connectionString;
+        private readonly string _connectionString = connectionString; // PostgreSQL connection string
 
-        public MessageService(string connectionString)
-        {
-            _connectionString = connectionString;
-        }
-
-        // Асинхронно получить все сообщения для конкретного байка
+        // Asynchronously retrieves all messages related to a specific bike
         public async Task<List<Message>> GetMessagesAsync(int bikeId)
         {
-            var messages = new List<Message>();
+            var messages = new List<Message>(); // Initialize the list of messages
 
+            // Create and open a new PostgreSQL connection asynchronously
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
+            // Prepare the SQL query to fetch messages and their senders/receivers
             await using var cmd = new NpgsqlCommand(@"
                 SELECT m.id, m.from_user, m.to_user, m.content, m.created_at,
                        u1.name AS from_name, u2.name AS to_name
@@ -30,57 +28,68 @@ namespace Blazor.Services
                 ORDER BY m.created_at ASC
             ", conn);
 
+            // Bind the bikeId parameter to prevent SQL injection
             cmd.Parameters.AddWithValue("bikeId", bikeId);
 
+            // Execute the query and read results asynchronously
             await using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
+                // Map each row from the database to a Message object
                 messages.Add(new Message
                 {
-                    Id = reader.GetInt32(reader.GetOrdinal("id")),
-                    BikeId = bikeId,
-                    FromUserId = reader.GetInt32(reader.GetOrdinal("from_user")),
-                    ToUserId = reader.GetInt32(reader.GetOrdinal("to_user")),
-                    Content = reader["content"]?.ToString(),
-                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                    FromUser = new User { Name = reader["from_name"]?.ToString() },
-                    ToUser = new User { Name = reader["to_name"]?.ToString() }
+                    Id = reader.GetInt32(reader.GetOrdinal("id")), // Message ID
+                    BikeId = bikeId, // Bike ID related to the message
+                    FromUserId = reader.GetInt32(reader.GetOrdinal("from_user")), // Sender ID
+                    ToUserId = reader.GetInt32(reader.GetOrdinal("to_user")), // Receiver ID
+                    Content = reader["content"]?.ToString(), // Message text
+                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")), // Timestamp
+                    FromUser = new User { Name = reader["from_name"]?.ToString() }, // Sender details
+                    ToUser = new User { Name = reader["to_name"]?.ToString() } // Receiver details
                 });
             }
 
-            return messages;
+            return messages; // Return the list of messages
         }
 
-        // Асинхронно отправить новое сообщение
+        // Asynchronously inserts a new message into the database
         public async Task SendMessageAsync(Message message)
         {
+            // Open a PostgreSQL connection
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
+            // Prepare the SQL insert command
             await using var cmd = new NpgsqlCommand(@"
                 INSERT INTO messages (from_user, to_user, bike_id, content, created_at)
                 VALUES (@from, @to, @bike, @content, @createdAt)
             ", conn);
 
-            cmd.Parameters.AddWithValue("from", message.FromUserId);
-            cmd.Parameters.AddWithValue("to", message.ToUserId);
-            cmd.Parameters.AddWithValue("bike", message.BikeId);
-            cmd.Parameters.AddWithValue("content", message.Content ?? "");
-            cmd.Parameters.AddWithValue("createdAt", message.CreatedAt);
+            // Bind all parameters to prevent SQL injection
+            cmd.Parameters.AddWithValue("from", message.FromUserId); // Sender ID
+            cmd.Parameters.AddWithValue("to", message.ToUserId); // Receiver ID
+            cmd.Parameters.AddWithValue("bike", message.BikeId); // Bike ID
+            cmd.Parameters.AddWithValue("content", message.Content ?? ""); // Message text (nullable check)
+            cmd.Parameters.AddWithValue("createdAt", message.CreatedAt); // Timestamp
 
+            // Execute the command asynchronously
             await cmd.ExecuteNonQueryAsync();
         }
 
-        // Получить ID владельца байка
+        // Asynchronously retrieves the owner ID of a specific bike
         public async Task<int> GetBikeOwnerIdAsync(int bikeId)
         {
+            // Open PostgreSQL connection
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
+            // Prepare SQL query to get the owner (user_id) of the bike
             await using var cmd = new NpgsqlCommand("SELECT user_id FROM bikes WHERE id=@bikeId", conn);
             cmd.Parameters.AddWithValue("bikeId", bikeId);
 
+            // Execute scalar query (returns single value)
             var result = await cmd.ExecuteScalarAsync();
+            // Convert result to int; return 0 if null
             return result != null ? Convert.ToInt32(result) : 0;
         }
     }
