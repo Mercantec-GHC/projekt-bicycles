@@ -1,6 +1,6 @@
-﻿using Blazor.Components;                           // Components namespace
+﻿using Blazor.Components;                            // Components namespace
 using Blazor.Services;                              // Application services (BikeService, DbConfig)
-using Microsoft.AspNetCore.Components.Authorization; // Blazor authentication/authorization types
+using Microsoft.AspNetCore.Components.Authorization;// Blazor authentication/authorization types
 
 namespace Blazor
 {
@@ -18,6 +18,7 @@ namespace Blazor
             string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Database connection string is missing!");
             
+            // Register MessageService as a singleton
             builder.Services.AddSingleton(new MessageService(connectionString));
 
             // Register BikeService as a singleton, passing the connection string
