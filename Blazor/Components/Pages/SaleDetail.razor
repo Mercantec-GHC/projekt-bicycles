@@ -13,15 +13,34 @@
 }
 else
 {
-    <div class="card" style="max-width:500px;">
-        <div class="card-body">
-        <h4>@bike.Title</h4>
-        <p><strong>Brand:</strong> @bike.Brand</p>
-        <p><strong>Price:</strong> @bike.Price.ToString("C")</p>
-        <p><strong>Description:</strong> @bike.Description</p>
+    <div class="card p-3" style="max-width:800px;">
+        <div class="row g-3">
+
+            <!-- LEFT SIDE: IMAGE -->
+            <div class="col-md-5">
+                @if (!string.IsNullOrEmpty(bike.ImageUrl))
+                {
+                    <img src="@bike.ImageUrl" class="img-fluid rounded" alt="@bike.Title" />
+                }
+            </div>
+
+            <!-- RIGHT SIDE: INFO -->
+            <div class="col-md-7">
+                <h4>@bike.Title</h4>
+                <p><strong>Brand:</strong> @bike.Brand</p>
+                <p><strong>Price:</strong> @bike.Price.ToString("C")</p>
+                <p><strong>Condition:</strong> @bike.BikeCondition</p>
+                <p><strong>Location:</strong> @bike.Location</p>
+
+                <hr />
+
+                <h5>Description</h5>
+                <p>@bike.Description</p>
+            </div>
+
         </div>
-        <!-- Add more details as needed -->
     </div>
+
 }
 
 @code {
