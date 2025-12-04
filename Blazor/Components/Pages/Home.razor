@@ -28,22 +28,7 @@
 <div class="bikes-container">
     @foreach (var bike in NewestBikes)
     {
-        <div class="bike-card">
-        <div class="card h-100" @onclick="() => OpenSalesCard(bike.Id)" style="cursor:pointer">
-            <!-- Bike image -->
-            <img src="@bike.ImageUrl" alt="@bike.Title" class="bike-image" />
-
-            <!-- Bike information -->
-            <div class="bike-info">
-                <h4>@bike.Title</h4>
-                <p>Price: @bike.Price kr</p>
-                <p>Brand: @bike.Brand</p>
-                <p>Type: @bike.Type</p>
-                <p>Condition: @bike.BikeCondition</p>
-                <p>Location: @bike.Location</p>
-            </div>
-            </div>
-        </div>
+        <SaleCard Bike="bike" />
     }
 </div>
 

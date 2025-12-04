@@ -62,44 +62,17 @@ else if (!bikeList.Any())
 }
 else
 {
-    <div class="row">
+    <div class="bikes-container">
         @foreach (var bike in bikeList)
         {
-            <div class="col-md-4 mb-4">
-                <div class="card h-100" @onclick="() => OpenSalesCard(bike.Id)" style="cursor:pointer">
-                    @if (!string.IsNullOrEmpty(bike.ImageUrl))
-                    {
-                        <img src="@bike.ImageUrl" class="card-img-top" alt="@bike.Title" />
-                    }
-                    <div class="card-body">
-                        <h5 class="card-title">@bike.Title</h5>
-                        <p class="card-text">
-                            <strong>Brand:</strong> @bike.Brand <br />
-                            <strong>Type:</strong> @bike.Type <br />
-                            <strong>Price:</strong> @bike.Price.ToString("C") <br />
-                            <strong>Model Year:</strong> @bike.ModelYear <br />
-                            <strong>Color:</strong> @bike.Color <br />
-                            <strong>Gear Type:</strong> @bike.GearType <br />
-                            <strong>Brake Type:</strong> @bike.BreakType <br />
-                            <strong>Weight:</strong> @bike.Weight kg <br />
-                            <strong>Condition:</strong> @bike.BikeCondition <br />
-                            <strong>Location:</strong> @bike.Location <br />
-                            <strong>Posted by:</strong> @bike.User?.Name
-                        </p>
-                        @if (!string.IsNullOrEmpty(bike.Description))
-                        {
-                            <p><em>@bike.Description</em></p>
-                        }
-                    </div>
-                </div>
-            </div>
+            <SaleCard Bike = "bike" />
         }
     </div>
 }
 
 @code {
 
-    public Bike? Bike { get; set; }
+    public Bike? bike { get; set; }
 
     private void OpenSalesCard(int bikeId)
     {
