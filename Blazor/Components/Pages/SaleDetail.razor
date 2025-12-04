@@ -1,8 +1,12 @@
 ﻿@page "/saledetail/{id:int}"
 @using Blazor.Models
 @using Blazor.Services
+@using Microsoft.AspNetCore.Components.Authorization
 @rendermode InteractiveServer
+
 @inject BikeService BikeService
+@inject MessageService MessageService
+@inject SimpleDbAuthProvider Auth
 
 <h3>Bike Details</h3>
 
@@ -21,12 +25,10 @@ else
 
             <!-- LEFT: MAIN IMAGE -->
             <div class="col-md-6 text-center">
-
                 <img src="@currentImage"
                      class="main-image"
                      alt="@bike.Title" />
 
-                <!-- THUMBNAILS (only if multiple images exist later) -->
                 @if (imageList.Count > 1)
                 {
                     <div class="thumbnail-row mt-3">
@@ -48,9 +50,18 @@ else
                     <p><strong>Condition:</strong> @bike.BikeCondition</p>
                     <p><strong>Location:</strong> @bike.Location</p>
 
-                    <button class="btn btn-success w-100 mt-3">
-                        Contact seller
-                    </button>
+                    <AuthorizeView>
+                        <Authorized Context="authContext">
+                            @if (authContext.User.Identity?.Name != null && authContext.User.Identity.Name != bike.UserId.ToString())
+                            {
+                                <textarea class="form-control mb-2" placeholder="Write your message..." @bind="newMessage"></textarea>
+                                <button class="btn btn-success w-100" @onclick="SendMessage">Send Message</button>
+                            }
+                        </Authorized>
+                        <NotAuthorized>
+                            <p class="text-muted mt-2">Login to contact the seller</p>
+                        </NotAuthorized>
+                    </AuthorizeView>
                 </div>
             </div>
         </div>
@@ -59,6 +70,25 @@ else
         <div class="desc-section mt-5 p-4">
             <h4 class="text-center mb-3">Description</h4>
             <p class="description-text">@bike.Description</p>
+        </div>
+
+        <!-- MESSAGES LIST -->
+        <div class="messages-section mt-5 p-4">
+            <h4 class="mb-3">Messages</h4>
+            @if (messages.Count == 0)
+            {
+                <p>No messages yet.</p>
+            }
+            else
+            {
+                @foreach (var msg in messages)
+                {
+                    <div class="card mb-2 p-2">
+                        <strong>@msg.FromUser?.Name ?? "Unknown":</strong> @msg.Content
+                        <div class="text-muted" style="font-size:0.8em">@msg.CreatedAt.ToString("dd-MM-yyyy HH:mm")</div>
+                    </div>
+                }
+            }
         </div>
 
     </div>
@@ -72,19 +102,46 @@ else
     private string currentImage = string.Empty;
     private List<string> imageList = new List<string>();
 
+    private string newMessage = "";
+    private List<Message> messages = new List<Message>();
+
     protected override async Task OnInitializedAsync()
     {
         bike = await BikeService.GetBikeById(id);
 
         if (bike != null && !string.IsNullOrEmpty(bike.ImageUrl))
         {
-            // For now your model only supports ONE image
             imageList.Add(bike.ImageUrl);
-
-            // Set displayed image
             currentImage = bike.ImageUrl;
+        }
+
+        if (bike != null)
+        {
+            messages = await MessageService.GetMessagesAsync(bike.Id);
         }
     }
 
     private void SelectImage(string img) => currentImage = img;
+
+    private async Task SendMessage()
+    {
+        if (!string.IsNullOrWhiteSpace(newMessage) && bike != null)
+        {
+            var fromUserId = Auth.CurrentUserId;
+            var toUserId = bike.UserId;
+
+            await MessageService.SendMessageAsync(new Message
+            {
+                BikeId = bike.Id,
+                FromUserId = fromUserId,
+                ToUserId = toUserId,
+                Content = newMessage,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            newMessage = "";
+            messages = await MessageService.GetMessagesAsync(bike.Id);
+
+        }
+    }
 }

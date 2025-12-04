@@ -1,67 +1,79 @@
-﻿using Microsoft.AspNetCore.Components.Authorization; // Provides the base class for authentication state
-using System.Security.Claims; // Provides ClaimsPrincipal and ClaimsIdentity
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
 using Npgsql;
 
 namespace Blazor.Services
 {
     // Authentication provider that manages user login/logout using a PostgreSQL database
-    public class SimpleDbAuthProvider(string connectionString) : AuthenticationStateProvider
+    public class SimpleDbAuthProvider : AuthenticationStateProvider
     {
-        // Stores the currently logged-in user
-        private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
+        private int _currentUserId;
+        private ClaimsPrincipal _currentUser = new(new ClaimsIdentity()); // текущий пользователь
+        private readonly string _connectionString;
 
-        // Connection string for PostgreSQL database
-        private readonly string _connectionString = connectionString;
+        public SimpleDbAuthProvider(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
-        // Returns the current authentication state (logged-in user)
+        // Возвращает текущий ID пользователя
+        public int CurrentUserId => _currentUserId;
+
+        public void SetCurrentUserId(int id) => _currentUserId = id;
+
+        // Возвращает состояние аутентификации
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
             return Task.FromResult(new AuthenticationState(_currentUser));
         }
 
-        // Logs in a user with email and password
+        // Вход пользователя по email и паролю
         public async Task<bool> Login(string email, string password)
         {
-            // Create and open a PostgreSQL connection
             using var connection = new NpgsqlConnection(_connectionString);
             await connection.OpenAsync();
 
-            // Prepare SQL command to select user ID by email and password hash
-            using var command = new NpgsqlCommand("SELECT id FROM users WHERE email=@Email AND password_hash=@PasswordHash", connection);
+            using var command = new NpgsqlCommand(
+                "SELECT id FROM users WHERE email=@Email AND password_hash=@PasswordHash", connection);
+
             command.Parameters.AddWithValue("Email", email);
             command.Parameters.AddWithValue("PasswordHash", Hash(password));
 
-            // Execute command and get user ID
             var idObj = await command.ExecuteScalarAsync();
-            if (idObj == null || idObj == DBNull.Value) return false; // User not found
+            if (idObj == null || idObj == DBNull.Value) return false;
 
-            var id = idObj.ToString() ?? "0";
+            _currentUserId = Convert.ToInt32(idObj);
 
-            // Create claims identity for the logged-in user
-            var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, email ?? ""), new Claim("UserId", id)], "database"); // Authentication type
+            // Создаём ClaimsIdentity для пользователя
+            var identity = new ClaimsIdentity(
+                new[]
+                {
+                    new Claim(ClaimTypes.Name, email ?? ""),
+                    new Claim("UserId", _currentUserId.ToString())
+                }, "database");
 
-            // Update the current user
             _currentUser = new ClaimsPrincipal(identity);
 
-            // Notify Blazor that authentication state has changed
+            // Уведомляем Blazor о смене состояния аутентификации
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
 
-            return true; // Login successful
+            return true;
         }
 
-        // Logs out the current user
+        // Выход пользователя
         public void Logout()
         {
-            _currentUser = new ClaimsPrincipal(new ClaimsIdentity()); // Reset to empty identity
+            _currentUserId = 0;
+            _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
         }
 
-        // Hashes the password using SHA256
-        private string Hash(string input)
+        // Хэширование пароля SHA256
+        private static string Hash(string input)
         {
-            var bytes = System.Text.Encoding.UTF8.GetBytes(input); // Convert string to bytes
-            var hash = System.Security.Cryptography.SHA256.HashData(bytes); // Compute SHA256 hash
-            return Convert.ToHexString(hash); // Convert hash to hex string
+            var bytes = System.Text.Encoding.UTF8.GetBytes(input);
+            var hash = System.Security.Cryptography.SHA256.HashData(bytes);
+            return Convert.ToHexString(hash);
         }
     }
 }

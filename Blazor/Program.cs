@@ -17,6 +17,8 @@ namespace Blazor
             // Retrieve database connection string from appsettings.json
             string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Database connection string is missing!");
+            
+            builder.Services.AddSingleton(new MessageService(connectionString));
 
             // Register BikeService as a singleton, passing the connection string
             builder.Services.AddSingleton(new BikeService(connectionString));
