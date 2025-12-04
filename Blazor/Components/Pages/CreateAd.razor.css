@@ -8,20 +8,21 @@
     font-family: 'Segoe UI', sans-serif;
 }
 
-/* Deep selector for Blazor inputs and buttons */
-::deep(.create-ad-container input.form-control),
-::deep(.create-ad-container textarea.form-control),
-::deep(.create-ad-container select.form-control),
+/* All inputs, textareas, selects, and file inputs */
+::deep(.create-ad-container input),
+::deep(.create-ad-container textarea),
+::deep(.create-ad-container select),
 ::deep(.create-ad-container input[type="file"]) {
     background-color: #202020 !important;
     border: 1px solid #333 !important;
     color: #f5f5f5 !important;
     border-radius: 6px !important;
     padding: 10px !important;
+    outline: none !important;
 }
 
-::deep(.create-ad-container button.btn),
-::deep(.create-ad-container button.btn-primary) {
+/* Button */
+::deep(.create-ad-container button) {
     width: 100% !important;
     padding: 12px !important;
     border-radius: 6px !important;
@@ -34,7 +35,16 @@
     transition: background 0.2s !important;
 }
 
-::deep(.create-ad-container button.btn:hover),
-::deep(.create-ad-container button.btn-primary:hover) {
+::deep(.create-ad-container button:hover) {
     background-color: #111 !important;
+}
+
+/* Error message */
+::deep(.create-ad-container .alert-danger) {
+    background-color: #2b0000 !important;
+    border: 1px solid #550000 !important;
+    color: #ff9999 !important;
+    border-radius: 6px !important;
+    padding: 10px !important;
+    margin-bottom: 15px !important;
 }
