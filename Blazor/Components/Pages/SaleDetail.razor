@@ -4,7 +4,6 @@
 @rendermode InteractiveServer
 @inject BikeService BikeService
 
-
 <h3>Bike Details</h3>
 
 @if (bike == null)
@@ -13,44 +12,79 @@
 }
 else
 {
-    <div class="card p-3" style="max-width:800px;">
-        <div class="row g-3">
+    <div class="container mt-5">
 
-            <!-- LEFT SIDE: IMAGE -->
-            <div class="col-md-5">
-                @if (!string.IsNullOrEmpty(bike.ImageUrl))
+        <!-- TITLE -->
+        <h2 class="text-center mb-4">@bike.Title</h2>
+
+        <div class="row align-items-start">
+
+            <!-- LEFT: MAIN IMAGE -->
+            <div class="col-md-6 text-center">
+
+                <img src="@currentImage"
+                     class="main-image"
+                     alt="@bike.Title" />
+
+                <!-- THUMBNAILS (only if multiple images exist later) -->
+                @if (imageList.Count > 1)
                 {
-                    <img src="@bike.ImageUrl" class="img-fluid rounded" alt="@bike.Title" />
+                    <div class="thumbnail-row mt-3">
+                        @foreach (var img in imageList)
+                        {
+                            <img src="@img"
+                                 class="thumbnail @(img == currentImage ? "selected" : "")"
+                                 @onclick="() => SelectImage(img)" />
+                        }
+                    </div>
                 }
             </div>
 
-            <!-- RIGHT SIDE: INFO -->
-            <div class="col-md-7">
-                <h4>@bike.Title</h4>
-                <p><strong>Brand:</strong> @bike.Brand</p>
-                <p><strong>Price:</strong> @bike.Price.ToString("C")</p>
-                <p><strong>Condition:</strong> @bike.BikeCondition</p>
-                <p><strong>Location:</strong> @bike.Location</p>
+            <!-- RIGHT: INFO BOX -->
+            <div class="col-md-6">
+                <div class="info-box p-4">
+                    <h3>@bike.Price.ToString("C")</h3>
+                    <p><strong>Brand:</strong> @bike.Brand</p>
+                    <p><strong>Condition:</strong> @bike.BikeCondition</p>
+                    <p><strong>Location:</strong> @bike.Location</p>
 
-                <hr />
-
-                <h5>Description</h5>
-                <p>@bike.Description</p>
+                    <button class="btn btn-success w-100 mt-3">
+                        Contact seller
+                    </button>
+                </div>
             </div>
-
         </div>
-    </div>
 
+        <!-- DESCRIPTION SECTION -->
+        <div class="desc-section mt-5 p-4">
+            <h4 class="text-center mb-3">Description</h4>
+            <p class="description-text">@bike.Description</p>
+        </div>
+
+    </div>
 }
 
 @code {
-    [Parameter] 
+    [Parameter]
     public int id { get; set; }
+
     private Bike? bike;
+    private string currentImage = string.Empty;
+    private List<string> imageList = new List<string>();
 
     protected override async Task OnInitializedAsync()
     {
-        bike = await BikeService.GetBikeById(id);   
-    }
-}
+        bike = await BikeService.GetBikeById(id);
 
+        if (bike != null && !string.IsNullOrEmpty(bike.ImageUrl))
+        {
+            // For now your model only supports ONE image
+            imageList.Add(bike.ImageUrl);
+
+            // Set displayed image
+            currentImage = bike.ImageUrl;
+        }
+    }
+
+    private void SelectImage(string img) => currentImage = img;
+}
