@@ -7,6 +7,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @rendermode InteractiveServer
 
+<div class="create-ad-container">
 <h3>Create Bike Ad</h3>
 
 @if (!string.IsNullOrEmpty(errorMessage))
@@ -73,6 +74,7 @@
 
     <button type="submit" class="btn btn-primary">Create Ad</button>
 </EditForm>
+</div>
 
 
 @code {
