@@ -13,20 +13,23 @@
 }
 else
 {
-    <div>
+    <div class="card" style="max-width:500px;">
+        <div class="card-body">
         <h4>@bike.Title</h4>
         <p><strong>Brand:</strong> @bike.Brand</p>
         <p><strong>Price:</strong> @bike.Price.ToString("C")</p>
         <p><strong>Description:</strong> @bike.Description</p>
+        </div>
         <!-- Add more details as needed -->
     </div>
 }
 
 @code {
-    [Parameter] public int id { get; set; }
+    [Parameter] 
+    public int id { get; set; }
     private Bike? bike;
 
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         bike = await BikeService.GetBikeById(id);   
     }

@@ -66,7 +66,7 @@ else
         @foreach (var bike in bikeList)
         {
             <div class="col-md-4 mb-4">
-                <div class="card h-100">
+                <div class="card h-100" @onclick="() => OpenSalesCard(bike.Id)" style="cursor:pointer">
                     @if (!string.IsNullOrEmpty(bike.ImageUrl))
                     {
                         <img src="@bike.ImageUrl" class="card-img-top" alt="@bike.Title" />
@@ -98,6 +98,13 @@ else
 }
 
 @code {
+
+    public Bike Bike { get; set; }
+
+    private void OpenSalesCard(int bikeId)
+    {
+        NavigationManager.NavigateTo($"/saledetail/{bikeId}");
+    }
     private List<Bike>? bikeList;
 
     private string brandFilter = string.Empty;
@@ -125,11 +132,6 @@ else
             conditionFilter
         );
     }
-    public Bike Bike { get; set; }
     
-    private void OpenSalesCard()
-    {
-        NavigationManager.NavigateTo($"/saledetail{Bike.Id}");
-    }
 }
 

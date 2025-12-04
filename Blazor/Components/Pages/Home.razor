@@ -3,6 +3,7 @@
 @using Blazor.Services
 @inject BikeService BikeService // Inject the BikeService to fetch bike data
 @rendermode InteractiveServer  // Enable interactive Blazor Server rendering
+@inject NavigationManager NavigationManager
 
 <!-- Hero section with a background video -->
 <header class="hero-section">
@@ -28,6 +29,7 @@
     @foreach (var bike in NewestBikes)
     {
         <div class="bike-card">
+        <div class="card h-100" @onclick="() => OpenSalesCard(bike.Id)" style="cursor:pointer">
             <!-- Bike image -->
             <img src="@bike.ImageUrl" alt="@bike.Title" class="bike-image" />
 
@@ -40,11 +42,20 @@
                 <p>Condition: @bike.BikeCondition</p>
                 <p>Location: @bike.Location</p>
             </div>
+            </div>
         </div>
     }
 </div>
 
 @code {
+
+    public Bike Bike { get; set; }
+
+    private void OpenSalesCard(int bikeId)
+    {
+        NavigationManager.NavigateTo($"/saledetail/{bikeId}");
+    }
+
     private List<Bike> NewestBikes = new List<Bike>(); // List to store newest bikes
 
     protected override void OnInitialized()
