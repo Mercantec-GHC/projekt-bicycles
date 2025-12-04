@@ -3,8 +3,8 @@
 @using Blazor.Models
 @using Blazor.Services
 @inject NavigationManager Navigation
-
-
+@inject AuthenticationStateProvider AuthStateProvider 
+@using Microsoft.AspNetCore.Components.Authorization
 @rendermode InteractiveServer
 
 <h3>Create Bike Ad</h3>
@@ -74,12 +74,13 @@
     <button type="submit" class="btn btn-primary">Create Ad</button>
 </EditForm>
 
+
 @code {
     private string? errorMessage;
     private Bike bike = new Bike();
     private IBrowserFile? imageFile;
 
-    private void HandleFileSelected(InputFileChangeEventArgs e)
+    private async void HandleFileSelected(InputFileChangeEventArgs e)
     {
         imageFile = e.File;
     }
@@ -88,8 +89,20 @@
     {
         try
         {
-            errorMessage = null; // clear previous errors
+            errorMessage = null;
 
+            // GET LOGGED-IN USER
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            // ⬇SET USER ID IN THE BIKE MODEL
+            bike.UserId = int.Parse(
+                user.FindFirst("sub")?.Value // common for JWT
+                ?? user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value // common for Identity
+                ?? "0"
+            );
+
+            //  SAVE IN DATABASE
             await BikeService.CreateAdAsync(bike, imageFile);
 
             Navigation.NavigateTo("/bikes");
@@ -100,3 +113,4 @@
         }
     }
 }
+
