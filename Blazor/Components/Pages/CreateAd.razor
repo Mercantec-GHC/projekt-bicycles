@@ -8,81 +8,83 @@
 @rendermode InteractiveServer
 
 <div class="create-ad-container">
-<h3>Create Bike Ad</h3>
+    <h3>Create Bike Ad</h3>
 
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger">
-        @errorMessage
-    </div>
-}
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
 
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
 
-<EditForm Model="@bike" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+    <EditForm Model="@bike" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
         <div class="mb-3">
             <label class="form-label">Title:</label>
-            <InputText @bind-Value="bike.Title" />
+            <InputText @bind-Value="bike.Title" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Price:</label>
-            <InputNumber @bind-Value="bike.Price" />
+            <InputNumber @bind-Value="bike.Price" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Brand:</label>
-            <InputText @bind-Value="bike.Brand" />
+            <InputText @bind-Value="bike.Brand" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Type:</label>
-            <InputText @bind-Value="bike.Type" />
+            <InputText @bind-Value="bike.Type" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Color:</label>
-            <InputText @bind-Value="bike.Color" />
+            <InputText @bind-Value="bike.Color" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Model Year:</label>
-            <InputNumber @bind-Value="bike.ModelYear" />
+            <InputNumber @bind-Value="bike.ModelYear" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Condition:</label>
-            <InputText @bind-Value="bike.BikeCondition" />
+            <InputText @bind-Value="bike.BikeCondition" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Location:</label>
-            <InputText @bind-Value="bike.Location" />
+            <InputText @bind-Value="bike.Location" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Description:</label>
-            <InputTextArea @bind-Value="bike.Description" />
+            <InputTextArea @bind-Value="bike.Description" class="form-control" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Image:</label>
-            <InputFile OnChange="HandleFileSelected" />
+            <InputFile OnChange="HandleFileSelected" class="form-control" />
         </div>
 
-
-    <button type="submit" class="btn btn-primary">Create Ad</button>
-</EditForm>
+        <button type="submit" class="btn btn-primary">Create Ad</button>
+    </EditForm>
 </div>
-
 
 @code {
     private string? errorMessage;
+    private string? successMessage;
     private Bike bike = new Bike();
     private IBrowserFile? imageFile;
 
-    private async void HandleFileSelected(InputFileChangeEventArgs e)
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
         imageFile = e.File;
     }
@@ -92,22 +94,42 @@
         try
         {
             errorMessage = null;
+            successMessage = null;
 
-            // GET LOGGED-IN USER
+            // Get logged-in user
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
-            // ⬇SET USER ID IN THE BIKE MODEL
-            bike.UserId = int.Parse(
-                user.FindFirst("sub")?.Value // common for JWT
-                ?? user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value // common for Identity
-                ?? "0"
-            );
+            var userIdClaim = user.FindFirst("sub")?.Value
+                              ?? user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-            //  SAVE IN DATABASE
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                errorMessage = "Cannot determine your user ID. Please log in again.";
+                return;
+            }
+
+            // Verify user exists in DB
+            var dbUserExists = await BikeService.CheckUserExistsAsync(userId);
+            if (!dbUserExists)
+            {
+                errorMessage = "Logged-in user does not exist in the system.";
+                return;
+            }
+
+            bike.UserId = userId;
+
+            // Create ad
             await BikeService.CreateAdAsync(bike, imageFile);
 
-            Navigation.NavigateTo("/bikes");
+            // Show success
+            successMessage = "Ad created successfully!";
+            bike = new Bike(); // reset form
+            imageFile = null;
+
+            // Optional: navigate after a short delay
+            // await Task.Delay(1000);
+            // Navigation.NavigateTo("/bikes");
         }
         catch (Exception ex)
         {
@@ -115,4 +137,3 @@
         }
     }
 }
-

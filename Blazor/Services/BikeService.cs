@@ -275,5 +275,19 @@ namespace Blazor.Services
             // Execute the insert command asynchronously
             await cmd.ExecuteNonQueryAsync();
         }
+    
+
+    public async Task<bool> CheckUserExistsAsync(int userId)
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            var sql = "SELECT 1 FROM users WHERE id = @id";
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", userId);
+
+            var result = await cmd.ExecuteScalarAsync();
+            return result != null;
+        }
     }
 }
