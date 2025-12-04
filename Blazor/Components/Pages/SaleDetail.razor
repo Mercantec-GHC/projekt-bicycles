@@ -1,42 +1,42 @@
-﻿@page "/saledetail/{id:int}"
+﻿@page "/saledetail/{id:int}" // Route parameter: bike ID
 @using Blazor.Models
 @using Blazor.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @rendermode InteractiveServer
 
-@inject BikeService BikeService
-@inject MessageService MessageService
-@inject SimpleDbAuthProvider Auth
+@inject BikeService BikeService // Inject the service to get bike details
+@inject MessageService MessageService // Inject the service to handle messages
+@inject SimpleDbAuthProvider Auth // Inject the authentication provider
 
 <h3>Bike Details</h3>
 
-@if (bike == null)
+@if (bike == null) // If the bike is not yet loaded
 {
-    <p>Loading...</p>
+    <p>Loading...</p> // Show loading message
 }
 else
 {
     <div class="container mt-5">
 
         <!-- TITLE -->
-        <h2 class="text-center mb-4">@bike.Title</h2>
+        <h2 class="text-center mb-4">@bike.Title</h2> <!-- Show bike title -->
 
         <div class="row align-items-start">
 
             <!-- LEFT: MAIN IMAGE -->
             <div class="col-md-6 text-center">
-                <img src="@currentImage"
+                <img src="@currentImage"  
                      class="main-image"
                      alt="@bike.Title" />
 
-                @if (imageList.Count > 1)
+                @if (imageList.Count > 1) // If bike has multiple images
                 {
                     <div class="thumbnail-row mt-3">
-                        @foreach (var img in imageList)
+                        @foreach (var img in imageList) // Render thumbnails
                         {
                             <img src="@img"
-                                 class="thumbnail @(img == currentImage ? "selected" : "")"
-                                 @onclick="() => SelectImage(img)" />
+                                 class="thumbnail @(img == currentImage ? "selected" : "")"  
+                                 @onclick="() => SelectImage(img)" /> // On click, select image
                         }
                     </div>
                 }
@@ -45,20 +45,22 @@ else
             <!-- RIGHT: INFO BOX -->
             <div class="col-md-6">
                 <div class="info-box p-4">
-                    <h3>@bike.Price.ToString("C")</h3>
+                    <h3>@bike.Price.ToString("C")</h3> <!-- Display price with currency -->
                     <p><strong>Brand:</strong> @bike.Brand</p>
                     <p><strong>Condition:</strong> @bike.BikeCondition</p>
                     <p><strong>Location:</strong> @bike.Location</p>
 
+                    <!-- AuthorizeView displays content based on login status -->
                     <AuthorizeView>
-                        <Authorized Context="authContext">
+                        <Authorized Context="authContext"> <!-- If user is logged in -->
+                            @* Show message box only if user is NOT the bike owner *@
                             @if (authContext.User.Identity?.Name != null && authContext.User.Identity.Name != bike.UserId.ToString())
                             {
                                 <textarea class="form-control mb-2" placeholder="Write your message..." @bind="newMessage"></textarea>
                                 <button class="btn btn-success w-100" @onclick="SendMessage">Send Message</button>
                             }
                         </Authorized>
-                        <NotAuthorized>
+                        <NotAuthorized> <!-- If user is not logged in -->
                             <p class="text-muted mt-2">Login to contact the seller</p>
                         </NotAuthorized>
                     </AuthorizeView>
@@ -69,7 +71,7 @@ else
         <!-- DESCRIPTION SECTION -->
         <div class="desc-section mt-5 p-4">
             <h4 class="text-center mb-3">Description</h4>
-            <p class="description-text">@bike.Description</p>
+            <p class="description-text">@bike.Description</p> <!-- Show bike description -->
         </div>
 
         <!-- MESSAGES LIST -->
@@ -77,15 +79,16 @@ else
             <h4 class="mb-3">Messages</h4>
             @if (messages.Count == 0)
             {
-                <p>No messages yet.</p>
+                <p>No messages yet.</p> <!-- If no messages -->
             }
             else
             {
-                @foreach (var msg in messages)
+                @foreach (var msg in messages) // Render each message
                 {
                     <div class="card mb-2 p-2">
-                        <strong>@msg.FromUser?.Name ?? "Unknown":</strong> @msg.Content
+                       <strong>@msg.FromUser?.Name → @msg.ToUser?.Name:</strong> @msg.Content
                         <div class="text-muted" style="font-size:0.8em">@msg.CreatedAt.ToString("dd-MM-yyyy HH:mm")</div>
+
                     </div>
                 }
             }
@@ -96,52 +99,55 @@ else
 
 @code {
     [Parameter]
-    public int id { get; set; }
+    public int id { get; set; } // Bike ID from route
 
-    private Bike? bike;
-    private string currentImage = string.Empty;
-    private List<string> imageList = new List<string>();
+    private Bike? bike; // Current bike object
+    private string currentImage = string.Empty; // Currently displayed image
+    private List<string> imageList = new List<string>(); // List of all bike images
 
-    private string newMessage = "";
-    private List<Message> messages = new List<Message>();
+    private string newMessage = ""; // Content of new message
+    private List<Message> messages = new List<Message>(); // Messages for this bike
 
+    // Called when component is initialized
     protected override async Task OnInitializedAsync()
     {
-        bike = await BikeService.GetBikeById(id);
+        bike = await BikeService.GetBikeById(id); // Load bike info from database
 
         if (bike != null && !string.IsNullOrEmpty(bike.ImageUrl))
         {
-            imageList.Add(bike.ImageUrl);
-            currentImage = bike.ImageUrl;
+            imageList.Add(bike.ImageUrl); // Add main image to list
+            currentImage = bike.ImageUrl; // Set as currently displayed
         }
 
         if (bike != null)
         {
-            messages = await MessageService.GetMessagesAsync(bike.Id);
+            messages = await MessageService.GetMessagesAsync(bike.Id); // Load messages for this bike
         }
     }
 
+    // Change displayed image when thumbnail is clicked
     private void SelectImage(string img) => currentImage = img;
 
+    // Send a new message to the seller
     private async Task SendMessage()
     {
-        if (!string.IsNullOrWhiteSpace(newMessage) && bike != null)
+        if (!string.IsNullOrWhiteSpace(newMessage) && bike != null) // Ensure message is not empty
         {
-            var fromUserId = Auth.CurrentUserId;
-            var toUserId = bike.UserId;
+            var fromUserId = Auth.CurrentUserId; // Get logged-in user ID
+            var toUserId = bike.UserId; // Get bike owner ID
 
+            // Create and save new message
             await MessageService.SendMessageAsync(new Message
             {
                 BikeId = bike.Id,
                 FromUserId = fromUserId,
                 ToUserId = toUserId,
                 Content = newMessage,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow // Store timestamp
             });
 
-            newMessage = "";
-            messages = await MessageService.GetMessagesAsync(bike.Id);
-
+            newMessage = ""; // Clear input
+            messages = await MessageService.GetMessagesAsync(bike.Id); // Reload messages
         }
     }
 }
