@@ -21,56 +21,56 @@
 <EditForm Model="@bike" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
+        <div class="mb-3">
+            <label class="form-label">Title:</label>
+            <InputText @bind-Value="bike.Title" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Title:</label>
-        <InputText @bind-Value="bike.Title" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Price:</label>
+            <InputNumber @bind-Value="bike.Price" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Price:</label>
-        <InputNumber @bind-Value="bike.Price" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Brand:</label>
+            <InputText @bind-Value="bike.Brand" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Brand:</label>
-        <InputText @bind-Value="bike.Brand" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Type:</label>
+            <InputText @bind-Value="bike.Type" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Type:</label>
-        <InputText @bind-Value="bike.Type" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Color:</label>
+            <InputText @bind-Value="bike.Color" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Color:</label>
-        <InputText @bind-Value="bike.Color" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Model Year:</label>
+            <InputNumber @bind-Value="bike.ModelYear" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Model Year:</label>
-        <InputNumber @bind-Value="bike.ModelYear" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Condition:</label>
+            <InputText @bind-Value="bike.BikeCondition" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Condition:</label>
-        <InputText @bind-Value="bike.BikeCondition" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Location:</label>
+            <InputText @bind-Value="bike.Location" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Location:</label>
-        <InputText @bind-Value="bike.Location" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Description:</label>
+            <InputTextArea @bind-Value="bike.Description" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Description:</label>
-        <InputTextArea @bind-Value="bike.Description" class="form-control" />
-    </div>
+        <div class="mb-3">
+            <label class="form-label">Image:</label>
+            <InputFile OnChange="HandleFileSelected" />
+        </div>
 
-    <div class="mb-3">
-        <label class="form-label">Image:</label>
-        <InputFile OnChange="HandleFileSelected" class="form-control" />
-    </div>
 
     <button type="submit" class="btn btn-primary">Create Ad</button>
 </EditForm>
