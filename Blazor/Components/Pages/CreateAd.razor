@@ -9,6 +9,14 @@
 
 <h3>Create Bike Ad</h3>
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+
 <EditForm Model="@bike" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -67,6 +75,7 @@
 </EditForm>
 
 @code {
+    private string? errorMessage;
     private Bike bike = new Bike();
     private IBrowserFile? imageFile;
 
@@ -79,13 +88,15 @@
     {
         try
         {
+            errorMessage = null; // clear previous errors
+
             await BikeService.CreateAdAsync(bike, imageFile);
-            // Redirect to the bikes listing page or show success
+
             Navigation.NavigateTo("/bikes");
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error creating ad: " + ex.Message);
+            errorMessage = "Failed to create ad: " + ex.Message;
         }
     }
 }
