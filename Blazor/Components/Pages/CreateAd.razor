@@ -100,16 +100,17 @@
             var authState = await AuthStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
-            var userIdClaim = user.FindFirst("sub")?.Value
-                              ?? user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            // Get the UserId claim set by SimpleDbAuthProvider
+            var userIdClaim = user.FindFirst("UserId")?.Value;
 
+            // Validate claim
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
                 errorMessage = "Cannot determine your user ID. Please log in again.";
                 return;
             }
 
-            // Verify user exists in DB
+            // Optional: Verify that this user exists in the database
             var dbUserExists = await BikeService.CheckUserExistsAsync(userId);
             if (!dbUserExists)
             {
@@ -117,18 +118,20 @@
                 return;
             }
 
+            // Assign the current user's ID to the bike
             bike.UserId = userId;
 
-            // Create ad
+            // Create the bike ad in the database
             await BikeService.CreateAdAsync(bike, imageFile);
 
-            // Show success
+            // Show success message
             successMessage = "Ad created successfully!";
-            bike = new Bike(); // reset form
+
+            // Reset form
+            bike = new Bike();
             imageFile = null;
 
-            // Optional: navigate after a short delay
-            // await Task.Delay(1000);
+            // Optional: Navigate to bike list
             // Navigation.NavigateTo("/bikes");
         }
         catch (Exception ex)
@@ -136,4 +139,5 @@
             errorMessage = "Failed to create ad: " + ex.Message;
         }
     }
+
 }
