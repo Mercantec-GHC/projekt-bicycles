@@ -107,7 +107,7 @@ namespace Blazor.Services
                     BikeCondition = reader["bike_condition"].ToString(),
                     Brand = reader["brand"].ToString(),
                     Location = reader["location"].ToString(),
-                    GearType = "Unknown",
+                    GearType = reader["gear_type"]?.ToString() ?? "Unknown",
                     ImageUrl = reader["image_url"]?.ToString() ?? "",
                     CreatedAt = (DateTime)reader["created_at"]
                 });
@@ -275,9 +275,9 @@ namespace Blazor.Services
             // Execute the insert command asynchronously
             await cmd.ExecuteNonQueryAsync();
         }
-    
 
-    public async Task<bool> CheckUserExistsAsync(int userId)
+
+        public async Task<bool> CheckUserExistsAsync(int userId)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();

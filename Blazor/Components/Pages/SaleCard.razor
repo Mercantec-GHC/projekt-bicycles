@@ -9,18 +9,18 @@
 <div class="bikes-container">
 
     <div class="bike-card">
-        <div class="card h-100" @onclick="() => OpenSalesCard(bike.Id)" style="cursor:pointer">
+        <div class="card h-100" @onclick="() => OpenSalesCard(Bike.Id)" style="cursor:pointer">
             <!-- Bike image -->
-            <img src="@bike.ImageUrl" alt="@bike.Title" class="bike-image" />
+            <img src="@Bike.ImageUrl" alt="@Bike.Title" class="bike-image" />
 
             <!-- Bike information -->
             <div class="bike-info">
-                <h4>@bike.Title</h4>
-                <p>Price: @bike.Price kr</p>
-                <p>Brand: @bike.Brand</p>
-                <p>Type: @bike.Type</p>
-                <p>Condition: @bike.BikeCondition</p>
-                <p>Location: @bike.Location</p>
+                <h4>@Bike.Title</h4>
+                <p>Price: @Bike.Price kr</p>
+                <p>Brand: @Bike.Brand</p>
+                <p>Type: @Bike.Type</p>
+                <p>Condition: @Bike.BikeCondition</p>
+                <p>Location: @Bike.Location</p>
             </div>
         </div>
     </div>
@@ -28,21 +28,22 @@
 </div>
 @code {
 
-
+    // this component are waiting to get Bike object from parent component
     [Parameter]
-    public Bike bike { get; set; }
+    public Bike Bike { get; set; }
 
     private void OpenSalesCard(int bikeId)
     {
         NavigationManager.NavigateTo($"/saledetail/{bikeId}");
     }
 
-    private string brandFilter = string.Empty;
+    // card should not filter anything - delete 
+    /*private string brandFilter = string.Empty;
     private string typeFilter = string.Empty;
     private decimal? maxPriceFilter;
     private int? modelYearFilter;
     private string conditionFilter = string.Empty;
     private string colorFilter = string.Empty;
-    private string locationFilter = string.Empty;
+    private string locationFilter = string.Empty;*/
 }
 

@@ -8,7 +8,7 @@ namespace Blazor.Services
     public class SimpleDbAuthProvider(string connectionString) : AuthenticationStateProvider
     {
         private int _currentUserId; // Stores the ID of the currently logged-in user
-        private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
+        private ClaimsPrincipal _currentUser = new(new ClaimsIdentity()); 
         // _currentUser holds the current user's ClaimsPrincipal (empty by default)
 
         private readonly string _connectionString = connectionString; // Stores the PostgreSQL connection string

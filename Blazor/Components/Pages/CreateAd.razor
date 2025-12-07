@@ -1,9 +1,9 @@
 ﻿@page "/create-ad"
-@inject BikeService BikeService 
+@inject BikeService BikeService
 @using Blazor.Models
 @using Blazor.Services
 @inject NavigationManager Navigation
-@inject AuthenticationStateProvider AuthStateProvider 
+@inject AuthenticationStateProvider AuthStateProvider
 @using Microsoft.AspNetCore.Components.Authorization
 @rendermode InteractiveServer
 
@@ -126,7 +126,7 @@
 
             // Show success message
             successMessage = "Ad created successfully!";
- 
+
             // Reset form
             bike = new Bike();
             imageFile = null;
@@ -139,5 +139,4 @@
             errorMessage = "Failed to create ad: " + ex.Message;
         }
     }
-
 }
