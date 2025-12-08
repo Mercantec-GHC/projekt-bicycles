@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @using Blazor.Services
+@inject BikeService BikeService 
 
 @inject SimpleDbAuthProvider Auth      // Inject custom authentication provider.
 @inject NavigationManager Nav          // Inject navigation helper.
@@ -17,11 +18,25 @@
 
             <!-- Example dropdown menu -->
             <div class="dropdown">
-                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Bikes</a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Option 1</a></li>
-                </ul>
-            </div>
+    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Types</a>
+    <ul class="dropdown-menu">
+
+                    <!-- Goes through the types from the database -->
+        @if (types == null || types.Count == 0)
+        {
+            <li><span class="dropdown-item-text text-muted">No Types of Bikes</span></li>
+        }
+        else
+        {
+            @foreach (var t in types)
+            {
+                var href = $"/bikes?type={Uri.EscapeDataString(t)}";
+                <li><a class="dropdown-item" href="@href">@t</a></li>
+            }
+        }
+    </ul>
+</div>
+
         </div>
 
         <!-- Right-side section (auth controls) -->
@@ -66,4 +81,13 @@
         Auth.Logout();       // Clear authentication session
         Nav.NavigateTo("/"); // Redirect to homepage
     }
+
+    private List<string>? types; // List to hold distinct bike types
+
+    protected override async Task OnInitializedAsync()
+    {
+        types = await BikeService.GetDistinctTypesAsync(); // Fetch distinct bike types from the database
+    }
 }
+
+
