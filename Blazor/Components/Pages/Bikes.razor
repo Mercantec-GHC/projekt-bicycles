@@ -4,6 +4,7 @@
 @using Blazor.Services
 @using Blazor.Models
 @inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.WebUtilities
 
 <h3>Bikes</h3>
 
@@ -93,9 +94,22 @@ else
     private string colorFilter = string.Empty;
     private string locationFilter = string.Empty;
 
+
     protected override void OnInitialized()
     {
-        LoadBikes();
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("type", out var typeVals))
+        {
+            var typeFromQuery = typeVals.ToString();
+            if (!string.IsNullOrWhiteSpace(typeFromQuery))
+            {
+                typeFilter = typeFromQuery.Trim();
+            }
+        }
+
+        LoadBikes(); // kalder din eksisterende BikeService.GetBikes(...)
     }
 
     private void LoadBikes() //Loads bikes from BikeService applying current filter values.
