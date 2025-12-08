@@ -2,8 +2,8 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Blazor.Services
 
-@inject SimpleDbAuthProvider Auth      // Inject custom authentication provider
-@inject NavigationManager Nav          // Inject navigation helper
+@inject SimpleDbAuthProvider Auth      // Inject custom authentication provider.
+@inject NavigationManager Nav          // Inject navigation helper.
 
 <!-- Main navigation bar -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary align-items-center">
@@ -35,6 +35,9 @@
                     <!-- Link to create a new bike ad -->
                     <NavLink class="btn btn-success" href="/create-ad">Sell bike</NavLink>
 
+                    <!-- Link to My Account page -->
+                    <NavLink class="btn btn-primary me-2" href="/my-account">My Account</NavLink>
+
                     <!-- Logout button -->
                     <button class="btn btn-danger" @onclick="DoLogout">Logout</button>
                 </Authorized>
@@ -53,6 +56,8 @@
 <div class="page-content container mt-4">
     @Body
 </div>
+
+
 
 @code {
     // Handles logout action, clears auth state and redirects home
