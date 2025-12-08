@@ -9,8 +9,9 @@
 
 <div class="filters mb-4">
     @*A container for filter inputs.*@
-    <input placeholder="Brand"
-           @bind="brandFilter"
+    <!-- bind="brandFilter": binds the input value to the brandFilter property. -->
+    <input placeholder="Brand" 
+           @bind="brandFilter" 
            @bind:event="oninput"
            @bind:after="LoadBikes"
            class="form-control mb-2" />
@@ -56,37 +57,37 @@
     </select>
 </div>
 
-@if (bikeList == null)
+@if (bikeList == null)  //Displays a message while bikes are being loaded.
 {
     <p>Loading bikes...</p>
 }
-else if (!bikeList.Any())
+else if (!bikeList.Any()) //Displays a message if no bikes match the filters.
 {
     <p>No bikes found matching these filters.</p>
 }
 else
 {
-    <div class="bikes-container">
-        @foreach (var bike in bikeList)
-        {
-            <SaleCard Bike="bike" />
+    <div class="bikes-container">  
+        @foreach (var bike in bikeList) //Iterates through bikeList and displays each bike in a SaleCard component.
+         
+    <SaleCard Bike="bike" /> //SaleCard is a reusable component that shows details of a bike.
         }
     </div>
 }
 
 @code {
 
-    public Bike? bike { get; set; }
+    public Bike? bike { get; set; } // Property to hold a single bike instance.
 
-    private void OpenSalesCard(int bikeId)
+    private void OpenSalesCard(int bikeId) //Method to navigate to the detail page of a bike by ID.
     {
-        NavigationManager.NavigateTo($"/saledetail/{bikeId}");
+        NavigationManager.NavigateTo($"/saledetail/{bikeId}"); //Navigates to the sale detail page for the specified bike ID.
     }
-    private List<Bike>? bikeList;
+    private List<Bike>? bikeList; // Holds the list of bikes currently loaded from BikeService.
 
     private string brandFilter = string.Empty;
     private string typeFilter = string.Empty;
-    private decimal? maxPriceFilter;
+    private decimal? maxPriceFilter; //Nullable types (decimal?, int?) allow empty input.
     private int? modelYearFilter;
     private string conditionFilter = string.Empty;
     private string colorFilter = string.Empty;
@@ -97,10 +98,10 @@ else
         LoadBikes();
     }
 
-    private void LoadBikes()
+    private void LoadBikes() //Loads bikes from BikeService applying current filter values.
     {
-        bikeList = BikeService.GetBikes(
-            brandFilter,
+        bikeList = BikeService.GetBikes( //Calls GetBikes method of BikeService with filter parameters.
+            brandFilter, // Passes current filter values to the service.
             typeFilter,
             colorFilter,
             locationFilter,
