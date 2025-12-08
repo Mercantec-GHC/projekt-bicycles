@@ -57,24 +57,24 @@
     </select>
 </div>
 
-@if (bikeList == null)  //Displays a message while bikes are being loaded.
+@if (bikeList == null) // Displays a message while bikes are being loaded.
 {
     <p>Loading bikes...</p>
 }
-else if (!bikeList.Any()) //Displays a message if no bikes match the filters.
+else if (!bikeList.Any()) // Displays a message if no bikes match the filters.
 {
     <p>No bikes found matching these filters.</p>
 }
 else
 {
-    <div class="bikes-container">  
-        @foreach (var bike in bikeList) //Iterates through bikeList and displays each bike in a SaleCard component.
-         
-    <SaleCard Bike="bike" /> //SaleCard is a reusable component that shows details of a bike.
+    <div class="bikes-container">
+        @foreach (var bike in bikeList) // Iterates through bikeList and displays each bike in a SaleCard component.
+        {
+            <SaleCard Bike="bike" />
+            // SaleCard is a reusable component that shows details of a bike.
         }
     </div>
 }
-
 @code {
 
     public Bike? bike { get; set; } // Property to hold a single bike instance.
