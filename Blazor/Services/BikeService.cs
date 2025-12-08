@@ -291,18 +291,19 @@ namespace Blazor.Services
         }
 
 
-        public List<string> GetDistinctTypes() // New method to get distinct bike types
+        public async Task<List<string>> GetDistinctTypesAsync() // New method to get distinct bike types
         {
-            var types = new List<string>();
+
             using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
+            await conn.OpenAsync();
 
             using var cmd = new NpgsqlCommand(
                 "SELECT DISTINCT type FROM bikes WHERE type IS NOT NULL AND type <> '' ORDER BY type ASC",
                 conn); // SQL to get distinct non-empty types
 
-            using var reader = cmd.ExecuteReader();
-            while (reader.Read())
+            var types = new List<string>();
+            var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
             {
                 var t = reader["type"]?.ToString()?.Trim();
                 if (!string.IsNullOrWhiteSpace(t))
