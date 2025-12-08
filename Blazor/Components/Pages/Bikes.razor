@@ -14,12 +14,15 @@
            @bind:event="oninput"
            @bind:after="LoadBikes"
            class="form-control mb-2" />
-    <input placeholder="Type"
-           @bind="typeFilter"
-           @bind:event="oninput"
-           @bind:after="LoadBikes"
-           class="form-control mb-2" />
-    <input type="number"
+        <select @bind="typeFilter" @bind:event="oninput" @bind:after="LoadBikes" class="form-control mb-2">
+        <option value="">All Types</option>
+        <option value="Mountain">Mountain</option>
+        <option value="City">City</option>
+        <option value="Electric">Electric</option>
+        <option value="Road">Road</option>
+        </select>
+           
+          <input type="number"
            placeholder="Max Price"
            @bind="maxPriceFilter"
            @bind:event="oninput"
