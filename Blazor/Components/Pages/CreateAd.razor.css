@@ -2,10 +2,11 @@
     max-width: 700px;
     margin: 40px auto;
     padding: 30px;
-    background: #181818;
-    border-radius: 12px;
-    color: #e0e0e0;
+    background: linear-gradient(135deg, #e3ffe7, #d6f7ff);
+    border-radius: 16px;
+    color: #1e2a2f;
     font-family: 'Segoe UI', sans-serif;
+    border: 2px solid #5bc34c; /* bicycle-green accent */
 }
 
 /* All inputs, textareas, selects, and file inputs */
@@ -13,38 +14,47 @@
 ::deep(.create-ad-container textarea),
 ::deep(.create-ad-container select),
 ::deep(.create-ad-container input[type="file"]) {
-    background-color: #202020 !important;
-    border: 1px solid #333 !important;
-    color: #f5f5f5 !important;
-    border-radius: 6px !important;
+    background-color: #ffffff !important;
+    border: 2px solid #5bc34c !important; /* green bicycle accent */
+    color: #1e2a2f !important;
+    border-radius: 8px !important;
     padding: 10px !important;
     outline: none !important;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+::deep(.create-ad-container input:focus),
+::deep(.create-ad-container textarea:focus),
+::deep(.create-ad-container select:focus) {
+    border-color: #009fe3 !important; /* sky-blue cycling detail */
+    box-shadow: 0 0 6px rgba(0, 159, 227, 0.4) !important;
 }
 
 /* Button */
 ::deep(.create-ad-container button) {
     width: 100% !important;
-    padding: 12px !important;
-    border-radius: 6px !important;
-    font-size: 16px !important;
-    font-weight: 500 !important;
-    background-color: #000000 !important;
-    color: #f5f5f5 !important;
-    border: 1px solid #222 !important;
+    padding: 14px !important;
+    border-radius: 8px !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    background: linear-gradient(135deg, #5bc34c, #009fe3) !important;
+    color: #ffffff !important;
+    border: none !important;
     cursor: pointer !important;
-    transition: background 0.2s !important;
+    transition: transform 0.2s ease, filter 0.2s ease;
 }
 
 ::deep(.create-ad-container button:hover) {
-    background-color: #111 !important;
+    transform: scale(1.03) !important;
+    filter: brightness(1.1) !important;
 }
 
 /* Error message */
 ::deep(.create-ad-container .alert-danger) {
-    background-color: #2b0000 !important;
-    border: 1px solid #550000 !important;
-    color: #ff9999 !important;
-    border-radius: 6px !important;
-    padding: 10px !important;
+    background-color: #ffe8e8 !important;
+    border: 1px solid #ff4b4b !important;
+    color: #b10000 !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
     margin-bottom: 15px !important;
 }
