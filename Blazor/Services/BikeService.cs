@@ -289,5 +289,27 @@ namespace Blazor.Services
             var result = await cmd.ExecuteScalarAsync();
             return result != null;
         }
+
+
+        public List<string> GetDistinctTypes() // New method to get distinct bike types
+        {
+            var types = new List<string>();
+            using var conn = new NpgsqlConnection(_connectionString);
+            conn.Open();
+
+            using var cmd = new NpgsqlCommand(
+                "SELECT DISTINCT type FROM bikes WHERE type IS NOT NULL AND type <> '' ORDER BY type ASC",
+                conn); // SQL to get distinct non-empty types
+
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var t = reader["type"]?.ToString()?.Trim();
+                if (!string.IsNullOrWhiteSpace(t))
+                    types.Add(t);
+            }
+            return types;
+
+        }
     }
 }
