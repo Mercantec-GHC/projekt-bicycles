@@ -11,41 +11,6 @@ namespace Blazor.Services
         private readonly string _connectionString = connectionString;
 
         // ------------------------------------------------------------
-        // 1. Get first 20 bikes (used in general listing pages)
-        // ------------------------------------------------------------
-        public List<Bike> GetAllBikes()
-        {
-            var bikes = new List<Bike>();
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand("SELECT * FROM bikes ORDER BY id LIMIT 20;", conn);
-            using var reader = cmd.ExecuteReader();
-
-            // Read each record and map to a Bike object
-            while (reader.Read())
-            {
-                bikes.Add(new Bike
-                {
-                    Id = (int)reader["id"],
-                    Title = reader["title"].ToString(),
-                    Price = (decimal)reader["price"],
-                    UserId = (int)reader["user_id"],
-                    Color = reader["color"].ToString(),
-                    Type = reader["type"].ToString(),
-                    BikeCondition = reader["bike_condition"].ToString(),
-                    Brand = reader["brand"].ToString(),
-                    Location = reader["location"].ToString(),
-                    GearType = "Unknown", // Placeholder
-                    ImageUrl = reader["image_url"]?.ToString() ?? "",
-                    CreatedAt = (DateTime)reader["created_at"]
-                });
-            }
-
-            return bikes;
-        }
-
-        // ------------------------------------------------------------
         // 2. Get a single bike by its ID (for detailed view page)
         // ------------------------------------------------------------
         public async Task<Bike?> GetBikeById(int id)
