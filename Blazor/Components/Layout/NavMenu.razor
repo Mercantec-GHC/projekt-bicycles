@@ -1,4 +1,4 @@
-﻿@using Blazor.Services
+﻿<!--@using Blazor.Services
 @inject BikeService BikeService
 
 @code {
@@ -9,9 +9,9 @@
         // Hent distinkte typer fra databasen (via din Npgsql-baserede BikeService)
         //types = BikeService.GetDistinctTypes();
     }
-}
+}-->
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary align-items-center">
+<!--<nav class="navbar navbar-expand-lg navbar-dark bg-primary align-items-center">
     <div class="container-fluid">
 
         <nav class="navbar">
@@ -19,40 +19,40 @@
 
             <div class="navbar-nav">
                 <a class="nav-link" href="/bikes">Bikes</a>
-               
+
                 <div class="dropdown">
                     #
-                        Types
-                    
+                    Types
+
 
                     <ul class="dropdown-menu" aria-labelledby="bikesDropdown">
                         @if (types is null || types.Count == 0)
                         {
-                            <li><span class="dropdown-item-text text-muted">Ingen typer</span></li>
+                       //   <li><span class="dropdown-item-text text-muted">Ingen typer</span></li>
                         }
                         else
                         {
                             @foreach (var t in types)
                             {
                                 var href = $"/bikes?type={Uri.EscapeDataString(t)}";
-                                <li> href@t</li>
-                                    
-                                
+                            //    <li> href@t</li>
+
+
                             }
                         }
                     </ul>
                 </div>
             </div>
-        </nav>
+        </nav> -->
 
         <!-- Login / Sign Up -->
-        <div class="d-flex">
-                <NavLink class="btn btn-outline-light me-2" href="/login">Login</NavLink>
-                <NavLink class="btn btn-light" href="/signup">Sign Up</NavLink>
+      <!--  <div class="d-flex">
+            <NavLink class="btn btn-outline-light me-2" href="/login">Login</NavLink>
+            <NavLink class="btn btn-light" href="/signup">Sign Up</NavLink>
         </div>
 
     </div>
-</nav>
+</nav> -->
 
 
 
