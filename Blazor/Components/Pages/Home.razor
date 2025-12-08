@@ -28,15 +28,16 @@
 <div class="bikes-container">
     @foreach (var bike in NewestBikes)
     {
-        // creates SaleCard component, find property [Parameter]public Bike Bike { get; set; }, send object there
-        // we dont create new bike, we get it from card
-        // each card has own Bike object
+        // Creates a SaleCard component and passes the current Bike object to it via the [Parameter] property `public Bike Bike { get; set; }`.
+        // We do not create a new Bike inside the card; the card receives the Bike object from the parent.
+        // Each card gets its own Bike instance from the NewestBikes list.
         <SaleCard Bike="bike" />
     }
 </div>
 
 @code {
 
+    // should not make new Bike here, it comes from GetNewestBikes(list with bikes) 
     // public Bike Bike { get; set; }
 
     private void OpenSalesCard(int bikeId)

@@ -28,7 +28,7 @@
 </div>
 @code {
 
-    // this component are waiting to get Bike object from parent component
+    // this component are waiting to get Bike object from parent component and should not be described
     [Parameter]
     public Bike Bike { get; set; }
 
@@ -37,7 +37,10 @@
         NavigationManager.NavigateTo($"/saledetail/{bikeId}");
     }
 
-    // card should not filter anything - delete 
+    // card is empty in fact, Bike comes from parent (Home.razor) as parameter 
+    // card doesnt create Bike, only shows it (Title, Price, Barnd etc.)
+
+
     /*private string brandFilter = string.Empty;
     private string typeFilter = string.Empty;
     private decimal? maxPriceFilter;
