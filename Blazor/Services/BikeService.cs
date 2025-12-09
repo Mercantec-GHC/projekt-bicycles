@@ -55,7 +55,16 @@ namespace Blazor.Services
             using var conn = new NpgsqlConnection(_connectionString);
             conn.Open();
 
-            string sql = $"SELECT * FROM bikes ORDER BY created_at DESC LIMIT {count};";
+            string sql = $@"
+        SELECT 
+            b.*, 
+            u.id AS user_id, 
+            u.name AS user_name
+        FROM bikes b
+        LEFT JOIN users u ON u.id = b.user_id
+        ORDER BY b.created_at DESC
+        LIMIT {count};";
+
             using var cmd = new NpgsqlCommand(sql, conn);
             using var reader = cmd.ExecuteReader();
 
@@ -73,85 +82,91 @@ namespace Blazor.Services
                     Brand = reader["brand"].ToString(),
                     Location = reader["location"].ToString(),
                     GearType = reader["gear_type"]?.ToString() ?? "Unknown",
+                    BreakType = reader["break_type"]?.ToString(),
+                    Weight = reader["weight"] != DBNull.Value ? (decimal)reader["weight"] : 0,
+                    ModelYear = reader["model_year"] != DBNull.Value ? (int)reader["model_year"] : 0,
                     ImageUrl = reader["image_url"]?.ToString() ?? "",
-                    CreatedAt = (DateTime)reader["created_at"]
+                    CreatedAt = (DateTime)reader["created_at"],
+                    User = new User
+                    {
+                        ID = (int)reader["user_id"],
+                        Name = reader["user_name"]?.ToString() ?? "Unknown"
+                    }
                 });
             }
 
             return bikes;
         }
 
+
+
         // ------------------------------------------------------------
         // 4. Get bikes using advanced filters (brand, color, etc.)
         //    Used in the filtering/search page
         // ------------------------------------------------------------
         public List<Bike> GetBikes(
-            string? brand = null,
-            string? type = null,
-            string? color = null,
-            string? locationFilter = null,
-            decimal? maxPrice = null,
-            int? modelYear = null,
-            string? condition = null)
+     string? brand = null,
+     string? type = null,
+     string? color = null,
+     string? locationFilter = null,
+     decimal? maxPrice = null,
+     int? modelYear = null,
+     string? condition = null)
         {
             var bikes = new List<Bike>();
 
             using var conn = new NpgsqlConnection(_connectionString);
             conn.Open();
 
-            // Start building dynamic SQL query
-            var sql = new StringBuilder("SELECT * FROM bikes WHERE 1=1");
+            var sql = new StringBuilder(@"
+        SELECT b.*, u.name AS user_name
+        FROM bikes b
+        LEFT JOIN users u ON u.id = b.user_id
+        WHERE 1=1
+    ");
+
             var cmd = new NpgsqlCommand { Connection = conn };
 
-            // Conditionally append filters
             if (!string.IsNullOrEmpty(brand))
             {
-                sql.Append(" AND brand ILIKE @brand");
+                sql.Append(" AND b.brand ILIKE @brand");
                 cmd.Parameters.AddWithValue("brand", $"%{brand}%");
             }
-
             if (!string.IsNullOrEmpty(type))
             {
-                sql.Append(" AND type ILIKE @type");
+                sql.Append(" AND b.type ILIKE @type");
                 cmd.Parameters.AddWithValue("type", type);
             }
-
             if (!string.IsNullOrEmpty(color))
             {
-                sql.Append(" AND color ILIKE @color");
+                sql.Append(" AND b.color ILIKE @color");
                 cmd.Parameters.AddWithValue("color", $"%{color}%");
             }
-
             if (!string.IsNullOrEmpty(locationFilter))
             {
-                sql.Append(" AND location ILIKE @location");
+                sql.Append(" AND b.location ILIKE @location");
                 cmd.Parameters.AddWithValue("location", $"%{locationFilter}%");
             }
-
             if (maxPrice.HasValue)
             {
-                sql.Append(" AND price <= @maxPrice");
+                sql.Append(" AND b.price <= @maxPrice");
                 cmd.Parameters.AddWithValue("maxPrice", maxPrice.Value);
             }
-
             if (modelYear.HasValue)
             {
-                sql.Append(" AND model_year = @modelYear");
+                sql.Append(" AND b.model_year = @modelYear");
                 cmd.Parameters.AddWithValue("modelYear", modelYear.Value);
             }
-
             if (!string.IsNullOrEmpty(condition))
             {
-                sql.Append(" AND bike_condition = @condition");
+                sql.Append(" AND b.bike_condition = @condition");
                 cmd.Parameters.AddWithValue("condition", condition);
             }
 
-            // Limit to 50 results to avoid huge datasets
-            sql.Append(" ORDER BY created_at DESC LIMIT 50");
+            sql.Append(" ORDER BY b.created_at DESC LIMIT 50");
             cmd.CommandText = sql.ToString();
 
             using var reader = cmd.ExecuteReader();
-
             while (reader.Read())
             {
                 bikes.Add(new Bike
@@ -160,20 +175,25 @@ namespace Blazor.Services
                     Title = reader["title"].ToString(),
                     Price = (decimal)reader["price"],
                     UserId = (int)reader["user_id"],
-                    Color = reader["color"].ToString(),
+                    Brand = reader["brand"].ToString(),
                     Type = reader["type"].ToString(),
                     BikeCondition = reader["bike_condition"].ToString(),
-                    Brand = reader["brand"].ToString(),
                     Location = reader["location"].ToString(),
-                    GearType = "Unknown",
                     ImageUrl = reader["image_url"]?.ToString() ?? "",
-                    ModelYear = reader["model_year"] != DBNull.Value ? (int)reader["model_year"] : 0,
-                    CreatedAt = (DateTime)reader["created_at"]
+                    CreatedAt = (DateTime)reader["created_at"],
+
+                     
+                    User = new User
+                    {
+                        ID = (int)reader["user_id"],
+                        Name = reader["user_name"].ToString()
+                    }
                 });
             }
 
             return bikes;
         }
+
 
         // ------------------------------------------------------------
         // 5. Create a new bike advertisement, optionally with image upload
