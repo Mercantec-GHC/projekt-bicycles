@@ -181,8 +181,6 @@ namespace Blazor.Services
                     Location = reader["location"].ToString(),
                     ImageUrl = reader["image_url"]?.ToString() ?? "",
                     CreatedAt = (DateTime)reader["created_at"],
-
-                     
                     User = new User
                     {
                         ID = (int)reader["user_id"],
