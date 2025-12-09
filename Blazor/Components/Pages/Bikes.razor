@@ -94,8 +94,10 @@ else
     private string colorFilter = string.Empty;
     private string locationFilter = string.Empty;
 
+    [SupplyParameterFromQuery]
+    public string? Type { get; set; }
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
         var query = QueryHelpers.ParseQuery(uri.Query);
@@ -109,7 +111,7 @@ else
             }
         }
 
-        LoadBikes(); // kalder din eksisterende BikeService.GetBikes(...)
+        LoadBikes();
     }
 
     private void LoadBikes() //Loads bikes from BikeService applying current filter values.

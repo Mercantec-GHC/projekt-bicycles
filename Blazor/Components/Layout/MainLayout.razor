@@ -28,10 +28,10 @@
                     }
                     else
                     {
-                        @foreach (var t in types)
+                        @foreach (var type in types)
                         {
-                            var href = $"/bikes?type={Uri.EscapeDataString(t)}";
-                            <li><a class="dropdown-item" href="@href">@t</a></li>
+                            var href = $"/bikes?type={Uri.EscapeDataString(type)}";
+                            <li><a class="dropdown-item" href="@href">@type</a></li>
                         }
                     }
                 </ul>
