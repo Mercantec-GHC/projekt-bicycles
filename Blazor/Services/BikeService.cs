@@ -18,12 +18,18 @@ namespace Blazor.Services
             using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            using var cmd = new NpgsqlCommand("SELECT * FROM bikes WHERE id = @id;", conn);
+            var sql = @"
+        SELECT b.*, u.id AS user_id, u.name AS user_name, u.email, u.phone, u.created_at AS user_created_at
+        FROM bikes b
+        JOIN users u ON u.id = b.user_id
+        WHERE b.id = @id;
+    ";
+
+            using var cmd = new NpgsqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("id", id);
 
             using var reader = await cmd.ExecuteReaderAsync();
 
-            // If a record exists → map it to Bike
             if (await reader.ReadAsync())
             {
                 return new Bike
@@ -39,12 +45,18 @@ namespace Blazor.Services
                     Location = reader["location"].ToString(),
                     GearType = "Unknown",
                     ImageUrl = reader["image_url"]?.ToString() ?? "",
-                    CreatedAt = (DateTime)reader["created_at"]
+                    CreatedAt = (DateTime)reader["created_at"],
+                    User = new User
+                    {
+                        ID = (int)reader["user_id"],
+                        Name = reader["user_name"].ToString(),
+                    }
                 };
             }
 
-            return null; // No bike found
+            return null;  
         }
+
 
         // ------------------------------------------------------------
         // 3. Get newest bikes (for homepage, sliders, carousel, etc.)
@@ -97,8 +109,6 @@ namespace Blazor.Services
 
             return bikes;
         }
-
-
 
         // ------------------------------------------------------------
         // 4. Get bikes using advanced filters (brand, color, etc.)
@@ -288,9 +298,9 @@ namespace Blazor.Services
             var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                var t = reader["type"]?.ToString()?.Trim();
-                if (!string.IsNullOrWhiteSpace(t))
-                    types.Add(t);
+                var type = reader["type"]?.ToString()?.Trim();
+                if (!string.IsNullOrWhiteSpace(type))
+                    types.Add(type);
             }
             return types;
         }
