@@ -257,6 +257,57 @@ namespace Blazor.Services
 
             return result != null;
         }
+
+        public async Task EditAd(Bike bike)
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            var sql = @"
+                UPDATE bikes SET
+                    title = @title,
+                    price = @price,
+                    color = @color,
+                    type = @type,
+                    model_year = @modelYear,
+                    gear_type = @gearType,
+                    break_type = @breakType,
+                    weight = @weight,
+                    bike_condition = @bikeCondition,
+                    target_audience = @targetAudience,
+                    material = @material,
+                    brand = @brand,
+                    location = @location,
+                    description = @description
+                WHERE id = @id;
+            ";
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", bike.Id);
+            cmd.Parameters.AddWithValue("title", bike.Title ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("price", bike.Price);
+            cmd.Parameters.AddWithValue("color", bike.Color ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("type", bike.Type ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("modelYear", bike.ModelYear);
+            cmd.Parameters.AddWithValue("gearType", bike.GearType ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("breakType", bike.BreakType ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("weight", bike.Weight);
+            cmd.Parameters.AddWithValue("bikeCondition", bike.BikeCondition ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("targetAudience", bike.TargetAudience ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("material", bike.Material ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("brand", bike.Brand ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("location", bike.Location ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("description", bike.Description ?? (object)DBNull.Value);
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        public async Task DeleteAd(int bikeId)
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+            var sql = "DELETE FROM bikes WHERE id = @id";
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("id", bikeId);
+            await cmd.ExecuteNonQueryAsync();
+        }
         // Method to get distinct bike types
         public async Task<List<string>> GetDistinctTypesAsync() 
         {

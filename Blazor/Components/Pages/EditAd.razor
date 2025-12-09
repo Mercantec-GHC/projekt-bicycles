@@ -1,0 +1,55 @@
+﻿@page "/edit-ad/{id:int}"
+@using Blazor.Models
+@using Blazor.Services
+@rendermode InteractiveServer
+@inject NavigationManager Navigation
+@inject BikeService BikeService
+
+
+<h3>Edit Ad</h3>
+
+@if (bike == null)
+{
+        <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="@bike" OnValidSubmit="@SaveChanges">
+        <InputText @bind-Value="bike.Title" placeholder="Title" />
+        <br />
+        <InputTextArea @bind-Value="bike.Description" placeholder="Description" />
+        <br />
+        <InputNumber @bind-Value="bike.Price" placeholder="Price" />
+        <br />
+        <button type="submit">Save Changes</button>
+    </EditForm>
+    @if (!string.IsNullOrEmpty(editMessage))
+    {
+        <p>@editMessage</p>
+    }
+}
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+    private Bike? bike;
+    private string? editMessage;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        bike = await BikeService.GetBikeById(id);
+        if (bike == null)
+        {
+            editMessage = "Bike ad not found.";
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        await BikeService.EditAd(bike);
+        editMessage = "Ad updated successfully!";
+        Navigation.NavigateTo($"/sale-detail/{bike.Id}");
+    }
+
+}

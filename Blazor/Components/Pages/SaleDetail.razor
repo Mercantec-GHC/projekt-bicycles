@@ -3,6 +3,7 @@
 @using Blazor.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @rendermode InteractiveServer
+@inject NavigationManager Navigation // Inject navigation helper
 
 @inject BikeService BikeService // Inject the service to get bike details
 @inject MessageService MessageService // Inject the service to handle messages
@@ -55,9 +56,24 @@ else
                     <AuthorizeView>
                         <Authorized Context="authContext"> <!-- If user is logged in -->
                             @* Show message box only if user is NOT the bike owner *@
-                            @if (authContext.User.Identity?.Name != null && authContext.User.Identity.Name != bike.UserId.ToString())
+                            @{
+                                var loggedInUserId = authContext.User.FindFirst("UserId")?.Value;
+                                var ownerId = bike.UserId.ToString();
+                            }
+
+                            @if (loggedInUserId == ownerId)
                             {
-                                <textarea class="form-control mb-2" placeholder="Write your message..." @bind="newMessage"></textarea>
+                                <!-- Owner of the AD -->
+                                <button class="btn btn-primary w-100 mb-2" @onclick="Edit">Edit Ad</button>
+                                <button class="btn btn-danger w-100" @onclick="Delete">Delete Ad</button>
+                            }
+                            else
+                            {
+                                <!-- NOT owner of the AD -->
+                                <textarea class="form-control mb-2"
+                                          placeholder="Write your message..."
+                                          @bind="newMessage"></textarea>
+
                                 <button class="btn btn-success w-100" @onclick="SendMessage">Send Message</button>
                             }
                         </Authorized>
@@ -149,6 +165,19 @@ else
 
             newMessage = ""; // Clear input
             messages = await MessageService.GetMessagesAsync(bike.Id); // Reload messages
+        }
+    }
+    private void Edit()
+    {
+        // Navigate to edit page
+        Navigation.NavigateTo($"/edit-ad/{bike.Id}");
+    }
+    private async Task Delete()
+    {
+        if (bike != null)
+        {
+            await BikeService.DeleteAd(bike.Id); // Delete the bike ad
+            Navigation.NavigateTo("/"); // Redirect to homepage
         }
     }
 }
