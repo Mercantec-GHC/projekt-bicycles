@@ -257,39 +257,22 @@ namespace Blazor.Services
 
             return result != null;
         }
-        public List<string> GetDistinctTypes() // New method to get distinct bike types
-        {
-            var types = new List<string>();
-            using var conn = new NpgsqlConnection(_connectionString);
-            conn.Open();
-
-            using var cmd = new NpgsqlCommand(
-                "SELECT DISTINCT type FROM bikes WHERE type IS NOT NULL AND type <> '' ORDER BY type ASC",
-                conn); // SQL to get distinct non-empty types
-
-            using var reader = cmd.ExecuteReader();
-
-            while (reader.Read())
-            {
-                var t = reader["type"]?.ToString()?.Trim();
-                if (!string.IsNullOrWhiteSpace(t))
-                    types.Add(t);
-            }
-            return types;
-        }
-        public async Task<List<string>> GetDistinctTypesAsync() // New method to get distinct bike types
+        // Method to get distinct bike types
+        public async Task<List<string>> GetDistinctTypesAsync() 
         {
             using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
             using var cmd = new NpgsqlCommand(
-                "SELECT DISTINCT type FROM bikes WHERE type IS NOT NULL AND type <> '' ORDER BY type ASC",
+                "SELECT DISTINCT type FROM bikes WHERE type IS NOT NULL AND type <> '' ORDER BY type ASC", 
                 conn); // SQL to get distinct non-empty types
 
+            // Initialize a list to hold the resulting types.
             var types = new List<string>();
             var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
+                // Safely read the 'type' column, convert to string, and trim whitespace.
                 var type = reader["type"]?.ToString()?.Trim();
                 if (!string.IsNullOrWhiteSpace(type))
                     types.Add(type);
