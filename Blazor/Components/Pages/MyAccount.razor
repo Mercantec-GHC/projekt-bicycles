@@ -5,4 +5,55 @@
 @inject BikeService BikeService
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
+@inject UserService UserService
 
+
+<h2>My Account</h2>
+
+@if (UserBikes == null)
+{
+    <p>Loading...</p>
+}
+else if (!UserBikes.Any())
+{
+    <p>You have not created any ads yet.</p>
+}
+else
+{
+    <h3>Your Ads</h3>
+    <ul>
+        @foreach (var bike in UserBikes)
+        {
+            <li>
+                <strong>@bike.Title</strong> - @bike.Price.ToString("C")
+
+                @if (bike.Messages != null && bike.Messages.Any())
+                {
+                    <ul>
+                        @foreach (var msg in bike.Messages)
+                        {
+                            <li>From @msg.FromUser.Email: "@msg.Content"</li>
+                        }
+                    </ul>
+                }
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private List<Bike>? UserBikes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = AuthProvider.CurrentUserId;
+
+        UserBikes = await UserService.GetUserBikesAsync(userId);
+
+        // Load messages for each bike
+        foreach (var bike in UserBikes)
+        {
+            bike.Messages = await UserService.GetMessagesForBikeAsync(bike.Id);
+        }
+    }
+}

@@ -36,6 +36,8 @@ namespace Blazor
 
             // Tell DI that AuthenticationStateProvider = our SimpleDbAuthProvider instance
             builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<SimpleDbAuthProvider>());
+            
+            builder.Services.AddScoped<UserService>(sp => new UserService(connectionString));
 
             // Build the application with configured services
             var app = builder.Build();
