@@ -7,7 +7,6 @@
 @rendermode InteractiveServer
 @inject UserService UserService
 
-
 <h2>My Account</h2>
 
 @if (UserBikes == null)
@@ -36,6 +35,10 @@ else
                         }
                     </ul>
                 }
+                else
+                {
+                    <p>No messages yet.</p>
+                }
             </li>
         }
     </ul>
@@ -47,7 +50,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         var userId = AuthProvider.CurrentUserId;
-
         UserBikes = await UserService.GetUserBikesAsync(userId);
 
         // Load messages for each bike
