@@ -10,9 +10,6 @@
         // to the ConnectionString property.
         // This object is usually registered as a singleton in Program.cs,
         // so all services can access the same shared configuration.
-        public DbConfig(string connectionString)
-        {
-            ConnectionString = connectionString; // Save the provided connection string.
-        }
+        public DbConfig(string connectionString) => ConnectionString = connectionString; // Save the provided connection string.
     }
 }
