@@ -275,7 +275,6 @@ namespace Blazor.Services
                     types.Add(t);
             }
             return types;
-
         }
     }
 }

@@ -9,9 +9,9 @@
 <div class="bikes-container">
 
     <div class="bike-card">
-        <div class="card h-100" @onclick="() => OpenSalesCard(Bike.Id)" style="cursor:pointer">
+        <div class="card h-100" @onclick="() => OpenSalesCard(Bike!.Id)" style="cursor:pointer">
             <!-- Bike image -->
-            <img src="@Bike.ImageUrl" alt="@Bike.Title" class="bike-image" />
+            <img src="@Bike!.ImageUrl" alt="@Bike.Title" class="bike-image" />
 
             <!-- Bike information -->
             <div class="bike-info">
@@ -29,8 +29,8 @@
 @code {
 
     // this component are waiting to get Bike object from parent component and should not be described
-    [Parameter]
-    public Bike Bike { get; set; }
+    [Parameter] // it comes ouside from another component
+    public Bike? Bike { get; set; }
 
     private void OpenSalesCard(int bikeId)
     {

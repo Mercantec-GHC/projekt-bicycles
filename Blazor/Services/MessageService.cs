@@ -76,21 +76,5 @@ namespace Blazor.Services
             await cmd.ExecuteNonQueryAsync();
         }
 
-        // Asynchronously retrieves the owner ID of a specific bike
-        public async Task<int> GetBikeOwnerIdAsync(int bikeId)
-        {
-            // Open PostgreSQL connection
-            await using var conn = new NpgsqlConnection(_connectionString);
-            await conn.OpenAsync();
-
-            // Prepare SQL query to get the owner (user_id) of the bike
-            await using var cmd = new NpgsqlCommand("SELECT user_id FROM bikes WHERE id=@bikeId", conn);
-            cmd.Parameters.AddWithValue("bikeId", bikeId);
-
-            // Execute scalar query (returns single value)
-            var result = await cmd.ExecuteScalarAsync();
-            // Convert result to int; return 0 if null
-            return result != null ? Convert.ToInt32(result) : 0;
-        }
     }
 }

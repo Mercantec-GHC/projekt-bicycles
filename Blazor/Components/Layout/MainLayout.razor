@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 @using Blazor.Services
-@inject BikeService BikeService 
+@inject BikeService BikeService
 
 @inject SimpleDbAuthProvider Auth      // Inject custom authentication provider.
 @inject NavigationManager Nav          // Inject navigation helper.
@@ -18,24 +18,24 @@
 
             <!-- Example dropdown menu -->
             <div class="dropdown">
-    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Types</a>
-    <ul class="dropdown-menu">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Types</a>
+                <ul class="dropdown-menu">
 
                     <!-- Goes through the types from the database -->
-        @if (types == null || types.Count == 0)
-        {
-            <li><span class="dropdown-item-text text-muted">No Types of Bikes</span></li>
-        }
-        else
-        {
-            @foreach (var t in types)
-            {
-                var href = $"/bikes?type={Uri.EscapeDataString(t)}";
-                <li><a class="dropdown-item" href="@href">@t</a></li>
-            }
-        }
-    </ul>
-</div>
+                    @if (types == null || types.Count == 0)
+                    {
+                        <li><span class="dropdown-item-text text-muted">No Types of Bikes</span></li>
+                    }
+                    else
+                    {
+                        @foreach (var t in types)
+                        {
+                            var href = $"/bikes?type={Uri.EscapeDataString(t)}";
+                            <li><a class="dropdown-item" href="@href">@t</a></li>
+                        }
+                    }
+                </ul>
+            </div>
 
         </div>
 
@@ -71,8 +71,6 @@
 <div class="page-content container mt-4">
     @Body
 </div>
-
-
 
 @code {
     // Handles logout action, clears auth state and redirects home
