@@ -9,9 +9,9 @@
 <div class="bikes-container">
 
     <div class="bike-card">
-        <div class="card h-100" @onclick="() => OpenSalesCard(Bike.Id)" style="cursor:pointer">
+        <div class="card h-100" @onclick="() => OpenSalesCard(Bike!.Id)" style="cursor:pointer">
             <!-- Bike image -->
-            <img src="@Bike.ImageUrl" alt="@Bike.Title" class="bike-image" />
+            <img src="@Bike!.ImageUrl" alt="@Bike.Title" class="bike-image" />
 
             <!-- Bike information -->
             <div class="bike-info">
@@ -21,32 +21,20 @@
                 <p>Type: @Bike.Type</p>
                 <p>Condition: @Bike.BikeCondition</p>
                 <p>Location: @Bike.Location</p>
+                <p>Seller: @Bike.User?.Name</p>
             </div>
         </div>
     </div>
-    
 </div>
 @code {
 
     // this component are waiting to get Bike object from parent component and should not be described
-    [Parameter]
-    public Bike Bike { get; set; }
+    [Parameter] // it comes ouside from another component
+    public Bike? Bike { get; set; }
 
     private void OpenSalesCard(int bikeId)
     {
         NavigationManager.NavigateTo($"/saledetail/{bikeId}");
     }
-
-    // card is empty in fact, Bike comes from parent (Home.razor) as parameter 
-    // card doesnt create Bike, only shows it (Title, Price, Barnd etc.)
-
-
-    /*private string brandFilter = string.Empty;
-    private string typeFilter = string.Empty;
-    private decimal? maxPriceFilter;
-    private int? modelYearFilter;
-    private string conditionFilter = string.Empty;
-    private string colorFilter = string.Empty;
-    private string locationFilter = string.Empty;*/
 }
 

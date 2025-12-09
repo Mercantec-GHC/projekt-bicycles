@@ -1,107 +1,111 @@
 ﻿@page "/bikes"
-@inject BikeService BikeService // Inject the BikeService to access bike data from the database.
-@rendermode InteractiveServer //means the page will be interactive and run on the server, sending updates to the client.
+@inject BikeService BikeService
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Routing
 @using Blazor.Services
 @using Blazor.Models
-@inject NavigationManager NavigationManager
 
 <h3>Bikes</h3>
 
 <div class="filters mb-4">
-    @*A container for filter inputs.*@
-    <!-- bind="brandFilter": binds the input value to the brandFilter property. -->
-    <input placeholder="Brand" 
-           @bind="brandFilter" 
+    <!-- Filter inputs -->
+    <input placeholder="Brand"
+           @bind="brandFilter"
            @bind:event="oninput"
            @bind:after="LoadBikes"
            class="form-control mb-2" />
-        <select @bind="typeFilter" @bind:event="oninput" @bind:after="LoadBikes" class="form-control mb-2">
+
+    <select @bind="typeFilter"
+            @bind:event="onchange"
+            @bind:after="OnTypeFilterChanged"
+            class="form-control mb-2">
         <option value="">All Types</option>
         <option value="Mountain">Mountain</option>
         <option value="City">City</option>
         <option value="Electric">Electric</option>
         <option value="Road">Road</option>
-        </select>
-           
-          <input type="number"
-           placeholder="Max Price"
-           @bind="maxPriceFilter"
-           @bind:event="oninput"
-           @bind:after="LoadBikes"
-           class="form-control mb-2" />
-    <input type="number"
-           placeholder="Model Year"
-           @bind="modelYearFilter"
-           @bind:event="oninput"
-           @bind:after="LoadBikes"
-           class="form-control mb-2" />
+    </select>
+
+    <input type="number" placeholder="Max Price"
+           @bind="maxPriceFilter" @bind:event="oninput"
+           @bind:after="LoadBikes" class="form-control mb-2" />
+
+    <input type="number" placeholder="Model Year"
+           @bind="modelYearFilter" @bind:event="oninput"
+           @bind:after="LoadBikes" class="form-control mb-2" />
+
     <input placeholder="Color"
-           @bind="colorFilter"
-           @bind:event="oninput"
-           @bind:after="LoadBikes"
-           class="form-control mb-2" />
+           @bind="colorFilter" @bind:event="oninput"
+           @bind:after="LoadBikes" class="form-control mb-2" />
 
     <input placeholder="Location"
-           @bind="locationFilter"
-           @bind:event="oninput"
-           @bind:after="LoadBikes"
-           class="form-control mb-2" />
+           @bind="locationFilter" @bind:event="oninput"
+           @bind:after="LoadBikes" class="form-control mb-2" />
 
-    <select @bind="conditionFilter"
-            @bind:event="onchange"
-            @bind:after="LoadBikes"
-            class="form-control mb-2">
+    <select @bind="conditionFilter" @bind:event="onchange"
+            @bind:after="LoadBikes" class="form-control mb-2">
         <option value="">All Conditions</option>
         <option value="New">New</option>
         <option value="Used">Used</option>
     </select>
 </div>
 
-@if (bikeList == null) // Displays a message while bikes are being loaded.
+@if (bikeList is null)
 {
     <p>Loading bikes...</p>
 }
-else if (!bikeList.Any()) // Displays a message if no bikes match the filters.
+else if (!bikeList.Any())
 {
     <p>No bikes found matching these filters.</p>
 }
 else
 {
     <div class="bikes-container">
-        @foreach (var bike in bikeList) // Iterates through bikeList and displays each bike in a SaleCard component.
+        @foreach (var bike in bikeList)
         {
             <SaleCard Bike="bike" />
-            // SaleCard is a reusable component that shows details of a bike.
         }
     </div>
 }
+
 @code {
+    public Bike? bike { get; set; }
+    private List<Bike>? bikeList;
 
-    public Bike? bike { get; set; } // Property to hold a single bike instance.
-
-    private void OpenSalesCard(int bikeId) //Method to navigate to the detail page of a bike by ID.
-    {
-        NavigationManager.NavigateTo($"/saledetail/{bikeId}"); //Navigates to the sale detail page for the specified bike ID.
-    }
-    private List<Bike>? bikeList; // Holds the list of bikes currently loaded from BikeService.
-
+    // Filter properties
     private string brandFilter = string.Empty;
     private string typeFilter = string.Empty;
-    private decimal? maxPriceFilter; //Nullable types (decimal?, int?) allow empty input.
+    private decimal? maxPriceFilter;
     private int? modelYearFilter;
     private string conditionFilter = string.Empty;
     private string colorFilter = string.Empty;
     private string locationFilter = string.Empty;
 
-    protected override void OnInitialized()
+    // Query parameter bound to the URL
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Type { get; set; }
+
+    protected override void OnParametersSet()
     {
+        // Update type filter whenever the URL changes (e.g., /bikes?type=Road or /bikes)
+        typeFilter = string.IsNullOrWhiteSpace(Type) ? string.Empty : Type.Trim();
+
+        // Optional: Reset other filters when navigating back to All Bikes
+        if (string.IsNullOrEmpty(Type))
+        {
+            // brandFilter = colorFilter = locationFilter = conditionFilter = string.Empty;
+            // maxPriceFilter = modelYearFilter = null;
+        }
+
         LoadBikes();
     }
 
-    private void LoadBikes() //Loads bikes from BikeService applying current filter values.
+    private void LoadBikes()
     {
-        bikeList = BikeService.GetBikes( //Calls GetBikes method of BikeService with filter parameters.
-            brandFilter, // Passes current filter values to the service.
+        bikeList = BikeService.GetBikes(
+            brandFilter,
             typeFilter,
             colorFilter,
             locationFilter,
@@ -111,6 +115,18 @@ else
         );
     }
 
-}
+    // Sync dropdown changes with the URL for better navigation and back/forward support
+    private void OnTypeFilterChanged()
+    {
+        if (string.IsNullOrWhiteSpace(typeFilter))
+            NavigationManager.NavigateTo("/bikes", replace: false);
+        else
+            NavigationManager.NavigateTo($"/bikes?type={Uri.EscapeDataString(typeFilter)}", replace: false);
 
+        // LoadBikes() will be called automatically via OnParametersSet() because the URL changes
+    }
+
+    private void OpenSalesCard(int bikeId)
+        => NavigationManager.NavigateTo($"/saledetail/{bikeId}");
+}
 
