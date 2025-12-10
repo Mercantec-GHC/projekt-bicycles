@@ -24,7 +24,7 @@ else
         @foreach (var bike in UserBikes)
         {
             <li>
-                <strong>@bike.Title</strong> - @bike.Price.ToString("C")
+                <SaleCard Bike="bike" />
 
                 @if (bike.Messages != null && bike.Messages.Any())
                 {
