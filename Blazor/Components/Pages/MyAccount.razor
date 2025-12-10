@@ -41,10 +41,12 @@ else
     else
     {
         <h3 style="font-size: 1.4em; font-weight: bold; margin-bottom: 16px; color: #333;">My Ads</h3>
+        <div class="bikes-container">
         @foreach (var bike in UserBikes)
         {
             <SaleCard Bike="bike" />
         }
+        </div>
     }
 }
 

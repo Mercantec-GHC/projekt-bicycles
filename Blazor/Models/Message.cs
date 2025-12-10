@@ -14,8 +14,5 @@
 
         // user which received the message
         public User? ToUser { get; set; }
-
-        // bike related to the message
-        public Bike? Bike { get; set; }
     }
 }
