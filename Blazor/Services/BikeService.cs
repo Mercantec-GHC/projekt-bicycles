@@ -80,6 +80,7 @@ namespace Blazor.Services
                 {
                     Id = (int)reader["id"],
                     Title = reader["title"].ToString(),
+                    Description = reader["description"].ToString(),
                     Price = (decimal)reader["price"],
                     UserId = (int)reader["user_id"],
                     Color = reader["color"].ToString(),
@@ -174,6 +175,7 @@ namespace Blazor.Services
                 bikes.Add(new Bike
                 {
                     Id = (int)reader["id"],
+                    Description = reader["description"].ToString(),
                     Title = reader["title"].ToString(),
                     Price = (decimal)reader["price"],
                     UserId = (int)reader["user_id"],

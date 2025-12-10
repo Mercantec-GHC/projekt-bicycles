@@ -24,7 +24,7 @@ namespace Blazor.Services
             await conn.OpenAsync();
 
             // Query bikes by user_id
-            var sql = @"SELECT * FROM bikes WHERE user_id = @userId ORDER BY created_at DESC";
+            var sql = @"SELECT * FROM bikes WHERE user_id = @userId ORDER BY created_at DESC"; 
             await using var cmd = new NpgsqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("userId", userId);
 
