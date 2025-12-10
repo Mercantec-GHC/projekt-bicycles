@@ -5,37 +5,77 @@
 @inject NavigationManager Navigation
 @inject BikeService BikeService
 
-
-<h3>Edit Ad</h3>
+<h3 class="mb-4">Edit Ad</h3>
 
 @if (bike == null)
 {
-        <p>Loading...</p>
+    <div class="alert alert-info">Loading...</div>
 }
 else
 {
-    <EditForm Model="@bike" OnValidSubmit="@SaveChanges">
-        <InputText @bind-Value="bike.Title" placeholder="Title" />
-        <br />
-        <InputTextArea @bind-Value="bike.Description" placeholder="Description" />
-        <br />
-        <InputNumber @bind-Value="bike.Price" placeholder="Price" />
-        <br />
-        <button type="submit">Save Changes</button>
+    <EditForm Model="@bike" OnValidSubmit="@SaveChanges" class="card p-4 shadow-sm" style="max-width: 500px;">
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <InputText @bind-Value="bike.Title" class="form-control" placeholder="Enter title" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Price</label>
+            <InputNumber @bind-Value="bike.Price" class="form-control" placeholder="Enter price" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Brand</label>
+            <InputText @bind-Value="bike.Brand" class="form-control" placeholder="Enter brand" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Type</label>
+            <InputText @bind-Value="bike.Type" class="form-control" placeholder="Enter type" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Color</label>
+            <InputText @bind-Value="bike.Color" class="form-control" placeholder="Enter color" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Model Year</label>
+            <InputNumber @bind-Value="bike.ModelYear" class="form-control" placeholder="Enter model year" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Condition</label>
+            <InputText @bind-Value="bike.BikeCondition" class="form-control" placeholder="Enter condition" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Location</label>
+            <InputText @bind-Value="bike.Location" class="form-control" placeholder="Enter location" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <InputTextArea @bind-Value="bike.Description" class="form-control" placeholder="Enter description" rows="4" />
+        </div>
+
+
+
+        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
     </EditForm>
+
     @if (!string.IsNullOrEmpty(editMessage))
     {
-        <p>@editMessage</p>
+        <div class="alert alert-success mt-3">@editMessage</div>
     }
 }
-
 
 @code {
     [Parameter]
     public int id { get; set; }
     private Bike? bike;
     private string? editMessage;
-    
+
     protected override async Task OnInitializedAsync()
     {
         bike = await BikeService.GetBikeById(id);
@@ -51,5 +91,4 @@ else
         editMessage = "Ad updated successfully!";
         Navigation.NavigateTo($"/saledetail/{bike.Id}");
     }
-
 }
