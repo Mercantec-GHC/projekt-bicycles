@@ -1,5 +1,6 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #f3f7f4e;
 }
 
 a, .btn-link {
@@ -75,7 +76,7 @@ h1:focus {
     min-height: 100%;
     transform: translate(-50%, -50%);
     object-fit: cover;
-    z-index: -2;
+    z-index: 0;
 }
 
 /* Dark Overlay for readability */
@@ -85,7 +86,9 @@ h1:focus {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.7));
+    background: linear-gradient( to bottom, rgba(0,0,0,0.25), /* transparent near top for video visibility */
+    #e8f6ef /* matches start of new-products gradient */
+    );
     z-index: -1;
 }
 
@@ -113,16 +116,68 @@ h1:focus {
 
 /* Section below the hero */
 .new-products {
-    padding: 40px;
-    background: #fff;
+    background: linear-gradient(145deg, #e8f6ef, #d5f0e0); /* matches hero overlay */
+    border: 2px solid #26b050; /* success green border */
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(38, 176, 80, 0.15); /* slightly smaller shadow */
+    padding: 20px 30px; /* reduced from 30px 40px */
+    max-width: 850px; /* optional: slightly narrower */
+    margin: 20px auto; /* less vertical spacing */
     text-align: center;
-    font-family: Arial, sans-serif;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+    /* Heading */
     .new-products h2 {
-        font-size: 2rem;
-        margin-bottom: 20px;
+        color: #1f4d2f; /* darker success green */
+        font-size: 2rem; /* slightly smaller font */
+        margin-bottom: 15px;
+        font-weight: 700;
     }
+
+    /* Paragraph text */
+    .new-products p {
+        color: #333;
+        font-size: 0.95rem; /* slightly smaller font */
+        line-height: 1.5;
+    }
+
+    /* Hover effect for entire section */
+    .new-products:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(38, 176, 80, 0.2);
+    }
+
+
+/* Optional: styling cards inside section */
+.bike-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .bike-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 18px rgba(38, 176, 80, 0.2); /* green-tinted shadow */
+    }
+
+/* Optional: call-to-action button inside section */
+.new-products .btn-primary {
+    background-color: #26b050;
+    color: white;
+    border-radius: 12px;
+    padding: 12px 25px;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+    .new-products .btn-primary:hover {
+        background-color: #1f4d2f;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(38, 176, 80, 0.3);
+    }
+
 
 /* Base navbar */
 .navbar {
