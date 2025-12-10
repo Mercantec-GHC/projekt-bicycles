@@ -144,7 +144,7 @@ namespace Blazor.Services
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            var sql = "SELECT id, name, email, phone FROM users WHERE id = @UserId";
+            var sql = "SELECT id, name, email, phone, created_at FROM users WHERE id = @UserId";
             await using var cmd = new NpgsqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("UserId", userId);
 
@@ -156,7 +156,8 @@ namespace Blazor.Services
                     ID = reader.GetInt32(reader.GetOrdinal("id")),
                     Name = reader["name"]?.ToString(),
                     Email = reader["email"]?.ToString(),
-                    Phone = reader["phone"]?.ToString()
+                    Phone = reader["phone"]?.ToString(),
+                    CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at"))
                 };
             }
 
