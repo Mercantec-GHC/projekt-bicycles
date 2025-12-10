@@ -202,23 +202,10 @@ else
             CloseReplyModal();
         }
     }
-
-    private async Task SendMessageToOwner()
+    private void Edit()
     {
-        if (!string.IsNullOrWhiteSpace(newMessageToOwner) && bike != null)
-        {
-            await MessageService.SendMessageAsync(new Message
-            {
-                BikeId = bike.Id,
-                FromUserId = Auth.CurrentUserId,
-                ToUserId = bike.UserId,
-                Content = newMessageToOwner,
-                CreatedAt = DateTime.UtcNow
-            });
-
-            newMessageToOwner = "";
-            messages = await MessageService.GetMessagesAsync(bike.Id);
-        }
+        // Navigate to edit page
+        Navigation.NavigateTo($"/edit-ad/{bike.Id}");
     }
 
     private void Edit() => Navigation.NavigateTo($"/edit-ad/{bike?.Id}");
