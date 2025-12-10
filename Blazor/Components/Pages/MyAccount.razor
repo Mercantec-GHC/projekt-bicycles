@@ -20,28 +20,12 @@ else if (!UserBikes.Any())
 else
 {
     <h3>Your Ads</h3>
-    <ul>
-        @foreach (var bike in UserBikes)
-        {
-            <li>
-                <SaleCard Bike="bike" />
 
-                @if (bike.Messages != null && bike.Messages.Any())
-                {
-                    <ul>
-                        @foreach (var msg in bike.Messages)
-                        {
-                            <li>From @msg.FromUser.Email: "@msg.Content"</li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>No messages yet.</p>
-                }
-            </li>
-        }
-    </ul>
+    @foreach (var bike in UserBikes)
+    {
+        <SaleCard Bike="bike" />
+    }
+
 }
 
 @code {
