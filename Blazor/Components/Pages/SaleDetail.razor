@@ -167,6 +167,8 @@ else
             messages = await MessageService.GetMessagesAsync(bike.Id); // Reload messages
         }
     }
+    private string? editMessage;
+
     private void Edit()
     {
         // Navigate to edit page
@@ -177,6 +179,8 @@ else
         if (bike != null)
         {
             await BikeService.DeleteAd(bike.Id); // Delete the bike ad
+            editMessage = "Ad deleted successfully!";
+            await Task.Delay(800); // Small delay to ensure deletion is processed
             Navigation.NavigateTo("/"); // Redirect to homepage
         }
     }
