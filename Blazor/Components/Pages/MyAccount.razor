@@ -9,11 +9,11 @@
 
 <h2>My Account</h2>
 
-@if (UserBikes == null)
+@if (UserBikes == null) //check if UserBikes has not been loaded yet (still null). If so, shows a loading message.
 {
     <p>Loading...</p>
 }
-else if (!UserBikes.Any())
+else if (!UserBikes.Any()) //check if UserBikes is empty. If so, shows a message indicating no ads have been created.
 {
     <p>You have not created any ads yet.</p>
 }
