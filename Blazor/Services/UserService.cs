@@ -138,5 +138,29 @@ namespace Blazor.Services
             var hash = System.Security.Cryptography.SHA256.HashData(bytes); // Compute SHA256 hash
             return Convert.ToHexString(hash);                               // Convert hash to hexadecimal string
         }
+
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            var sql = "SELECT id, name, email, phone FROM users WHERE id = @UserId";
+            await using var cmd = new NpgsqlCommand(sql, conn);
+            cmd.Parameters.AddWithValue("UserId", userId);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return new User
+                {
+                    ID = reader.GetInt32(reader.GetOrdinal("id")),
+                    Name = reader["name"]?.ToString(),
+                    Email = reader["email"]?.ToString(),
+                    Phone = reader["phone"]?.ToString()
+                };
+            }
+
+            return null;
+        }
     }
 }

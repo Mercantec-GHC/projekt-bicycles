@@ -9,37 +9,48 @@
 
 <h2>My Account</h2>
 
-@if (UserBikes == null) //check if UserBikes has not been loaded yet (still null). If so, shows a loading message.
+@if (CurrentUser == null)
 {
-    <p>Loading...</p>
-}
-else if (!UserBikes.Any()) //check if UserBikes is empty. If so, shows a message indicating no ads have been created.
-{
-    <p>You have not created any ads yet.</p>
+    <p>Loading user info...</p>
 }
 else
 {
-    <h3>Your Ads</h3>
+    <div>
+        <p><strong>Name:</strong> @CurrentUser.Name</p>
+        <p><strong>Email:</strong> @CurrentUser.Email</p>
+        <p><strong>Phone:</strong> @CurrentUser.Phone</p>
+    </div>
 
-    @foreach (var bike in UserBikes)
+    @if (UserBikes == null)
     {
-        <SaleCard Bike="bike" />
+        <p>Loading bikes...</p>
     }
-
+    else if (!UserBikes.Any())
+    {
+        <p>You have not created any ads yet.</p>
+    }
+    else
+    {
+        <h3>My Ads</h3>
+        @foreach (var bike in UserBikes)
+        {
+            <SaleCard Bike="bike" />
+        }
+    }
 }
 
 @code {
+    private User? CurrentUser;
     private List<Bike>? UserBikes;
 
     protected override async Task OnInitializedAsync()
     {
         var userId = AuthProvider.CurrentUserId;
-        UserBikes = await UserService.GetUserBikesAsync(userId);
 
-        // Load messages for each bike
-        foreach (var bike in UserBikes)
-        {
-            bike.Messages = await UserService.GetMessagesForBikeAsync(bike.Id);
-        }
+        // Fetch user info
+        CurrentUser = await UserService.GetUserByIdAsync(userId);
+
+        // Fetch user bikes
+        UserBikes = await UserService.GetUserBikesAsync(userId);
     }
 }
