@@ -7,7 +7,7 @@
 @inject NavigationManager Nav          // Inject navigation helper.
 
 <!-- Main navigation bar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary align-items-center">
+<nav class="navbar navbar-expand-lg navbar-dark bg-success align-items-center">
     <div class="container-fluid">
         <!-- Brand / Home link -->
         <a class="navbar-brand" href="/">ReRide</a>
@@ -48,7 +48,7 @@
                     <span class="navbar-text me-2">Welcome, @authContext.User.Identity?.Name</span>
 
                     <!-- Link to create a new bike ad -->
-                    <NavLink class="btn btn-success" href="/create-ad">Sell bike</NavLink>
+                    <NavLink class="btn btn-primary" href="/create-ad">Sell bike</NavLink>
 
                     <!-- Link to My Account page -->
                     <NavLink class="btn btn-warning" href="/my-account">My Account</NavLink>

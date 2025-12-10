@@ -17,15 +17,12 @@ namespace Blazor
             // Retrieve database connection string from appsettings.json
             string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Database connection string is missing!");
-            
+
             // Register MessageService as a singleton
             builder.Services.AddSingleton(new MessageService(connectionString));
 
             // Register BikeService as a singleton, passing the connection string
             builder.Services.AddSingleton(new BikeService(connectionString));
-
-            // Register DbConfig so it can be injected anywhere the connection string is needed
-            builder.Services.AddSingleton(new DbConfig(connectionString));
 
             // Add basic authorization services required for AuthenticationStateProvider
             builder.Services.AddAuthorizationCore();
@@ -36,7 +33,8 @@ namespace Blazor
 
             // Tell DI that AuthenticationStateProvider = our SimpleDbAuthProvider instance
             builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<SimpleDbAuthProvider>());
-            
+
+            // Register UserService as scoped, passing the connection string
             builder.Services.AddScoped<UserService>(sp => new UserService(connectionString));
 
             // Build the application with configured services

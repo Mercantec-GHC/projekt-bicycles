@@ -85,5 +85,43 @@ namespace Blazor.Services
 
             return messages;
         }
+
+        public async Task<bool> SignUpAsync(string name, string email, string password)
+        {
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            // Проверка email
+            await using (var checkCmd = new NpgsqlCommand(
+                "SELECT COUNT(*) FROM users WHERE email=@Email", conn))
+            {
+                checkCmd.Parameters.AddWithValue("Email", email);
+                var count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync());
+
+                if (count > 0)
+                    return false; // email уже существует
+            }
+
+            // Вставка нового пользователя
+            await using var insertCmd = new NpgsqlCommand(
+                @"INSERT INTO users (name, email, password_hash, created_at) 
+                VALUES (@Name, @Email, @PasswordHash, @CreatedAt)", conn);
+            insertCmd.Parameters.AddWithValue("Name", name);
+            insertCmd.Parameters.AddWithValue("Email", email);
+            insertCmd.Parameters.AddWithValue("PasswordHash", Hash(password));
+            insertCmd.Parameters.AddWithValue("CreatedAt", DateTime.UtcNow);
+
+            await insertCmd.ExecuteNonQueryAsync();
+
+            return true;
+        }
+
+        private string Hash(string input)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(input);
+            var hash = System.Security.Cryptography.SHA256.HashData(bytes);
+            return Convert.ToHexString(hash);
+        }
+
     }
 }
