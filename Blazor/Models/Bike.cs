@@ -23,7 +23,6 @@
         public string? Description { get; set; }
         public DateTime CreatedAt { get; set; }
 
-
         // messages related to the bike
         public List<Message>? Messages { get; set; }
 
