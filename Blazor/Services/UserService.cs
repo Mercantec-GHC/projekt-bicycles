@@ -16,26 +16,26 @@ namespace Blazor.Services
         // ------------------------------------------------------------
         // 1. Get all bikes belonging to a specific user
         // ------------------------------------------------------------
-        public async Task<List<Bike>> GetUserBikesAsync(int userId)
+        public async Task<List<Bike>> GetUserBikesAsync(int userId) // get bikes for a user by userId
         {
-            var bikes = new List<Bike>();
+            var bikes = new List<Bike>(); //create list to hold bikes
 
-            await using var conn = new NpgsqlConnection(_connectionString);
-            await conn.OpenAsync();
+            await using var conn = new NpgsqlConnection(_connectionString); // create connection to db
+            await conn.OpenAsync(); // open connection
 
             // Query bikes by user_id
-            var sql = @"SELECT * FROM bikes WHERE user_id = @userId ORDER BY created_at DESC";
-            await using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("userId", userId);
+            var sql = @"SELECT * FROM bikes WHERE user_id = @userId ORDER BY created_at DESC"; // sql query to get bikes for user by userId 
+            await using var cmd = new NpgsqlCommand(sql, conn); // create command with sql and connection
+            cmd.Parameters.AddWithValue("userId", userId);// add userId parameter to command for security 
 
-            await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            await using var reader = await cmd.ExecuteReaderAsync(); // execute command and get data reader
+            while (await reader.ReadAsync()) // read each bike record
             {
-                bikes.Add(new Bike
+                bikes.Add(new Bike // create new bike object and add to list
                 {
-                    Id = reader.GetInt32(reader.GetOrdinal("id")),
+                    Id = reader.GetInt32(reader.GetOrdinal("id")), 
                     UserId = reader.GetInt32(reader.GetOrdinal("user_id")),
-                    Title = reader["title"]?.ToString(),
+                    Title = reader["title"]?.ToString(), //safely converts nullable strings.
                     Price = reader.GetDecimal(reader.GetOrdinal("price")),
                     Color = reader["color"]?.ToString(),
                     Type = reader["type"]?.ToString(),
@@ -48,9 +48,9 @@ namespace Blazor.Services
             }
 
             // Fetch messages for each bike
-            foreach (var bike in bikes)
+            foreach (var bike in bikes) // loop through each bike in list
             {
-                bike.Messages = await GetMessagesForBikeAsync(bike.Id);
+                bike.Messages = await GetMessagesForBikeAsync(bike.Id); // get messages for bike and assign to bike.Messages
             }
 
             return bikes;
@@ -59,14 +59,14 @@ namespace Blazor.Services
         // ------------------------------------------------------------
         // 2. Get all messages for a specific bike
         // ------------------------------------------------------------
-        public async Task<List<Message>> GetMessagesForBikeAsync(int bikeId)
+        public async Task<List<Message>> GetMessagesForBikeAsync(int bikeId) // get messages for bike by bikeId
         {
-            var messages = new List<Message>();
+            var messages = new List<Message>(); // create list to hold messages
 
-            await using var conn = new NpgsqlConnection(_connectionString);
+            await using var conn = new NpgsqlConnection(_connectionString);// create connection to db
             await conn.OpenAsync();
-
-            string sql = @"
+            
+            string sql = @" 
                 SELECT m.id, m.content, m.from_user, u.email AS from_email, m.to_user, m.bike_id, m.created_at
                 FROM messages m
                 JOIN users u ON m.from_user = u.id
@@ -74,13 +74,13 @@ namespace Blazor.Services
                 ORDER BY m.created_at DESC;
             ";
 
-            await using var cmd = new NpgsqlCommand(sql, conn);
-            cmd.Parameters.AddWithValue("bikeId", bikeId);
+            await using var cmd = new NpgsqlCommand(sql, conn); // create command with sql and connection
+            cmd.Parameters.AddWithValue("bikeId", bikeId); // add bikeId parameter to command for security
 
-            await using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            await using var reader = await cmd.ExecuteReaderAsync(); // execute command and get data reader
+            while (await reader.ReadAsync()) 
             {
-                messages.Add(new Message
+                messages.Add(new Message // create new message object and add to list
                 {
                     Id = reader.GetInt32(reader.GetOrdinal("id")),
                     Content = reader["content"]?.ToString(),
@@ -88,7 +88,7 @@ namespace Blazor.Services
                     ToUserId = reader.GetInt32(reader.GetOrdinal("to_user")),
                     BikeId = reader.GetInt32(reader.GetOrdinal("bike_id")),
                     CreatedAt = reader.GetDateTime(reader.GetOrdinal("created_at")),
-                    FromUser = new User { Email = reader["from_email"]?.ToString() }
+                    FromUser = new User { Email = reader["from_email"]?.ToString() } 
                 });
             }
 
@@ -106,12 +106,12 @@ namespace Blazor.Services
 
             // Check if the email already exists
             await using (var checkCmd = new NpgsqlCommand(
-                "SELECT COUNT(*) FROM users WHERE email=@Email", conn))
+                "SELECT COUNT(*) FROM users WHERE email=@Email", conn)) // check if email exists in users table
             {
-                checkCmd.Parameters.AddWithValue("Email", email);
-                var count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync());
+                checkCmd.Parameters.AddWithValue("Email", email); // add email parameter to command for security
+                var count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync()); // execute command and get count of records with that email
 
-                if (count > 0)
+                if (count > 0) // if count is greater than 0, email already exists
                     return false; // Email already exists
             }
 
@@ -139,7 +139,7 @@ namespace Blazor.Services
             return Convert.ToHexString(hash);                               // Convert hash to hexadecimal string
         }
 
-        public async Task<User?> GetUserByIdAsync(int userId)
+        public async Task<User?> GetUserByIdAsync(int userId) 
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
