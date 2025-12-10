@@ -6,10 +6,10 @@ namespace Blazor
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             // Create the WebApplicationBuilder which configures logging, DI services, and middleware
-            var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder();
 
             // Add Razor Components and enable interactive Blazor Server functionality
             builder.Services.AddRazorComponents().AddInteractiveServerComponents();
@@ -19,6 +19,7 @@ namespace Blazor
                 ?? throw new InvalidOperationException("Database connection string is missing!");
 
             // Register MessageService as a singleton
+            // Singletone - one instance for the lifetime of the application
             builder.Services.AddSingleton(new MessageService(connectionString));
 
             // Register BikeService as a singleton, passing the connection string
@@ -29,6 +30,7 @@ namespace Blazor
 
             // Register the custom authentication provider as scoped
             // This defines how SimpleDbAuthProvider should be created
+            // Scoped - one instance per user session/connection
             builder.Services.AddScoped<SimpleDbAuthProvider>(sp => new SimpleDbAuthProvider(connectionString));
 
             // Tell DI that AuthenticationStateProvider = our SimpleDbAuthProvider instance
