@@ -38,12 +38,12 @@ else
 
             <div class="col-md-6">
                 <div class="info-box p-4 border rounded">
-                    <h3>@bike.Price.ToString() DKK</h3>
+                    <h3>@bike.Price.ToString("C")</h3>
                     <p><strong>Brand:</strong> @bike.Brand</p>
                     <p><strong>Condition:</strong> @bike.BikeCondition</p>
                     <p><strong>Location:</strong> @bike.Location</p>
                     <p><strong>Seller:</strong> @bike.User?.Name</p>
-                    <p><strong>Description:</strong>@bike.Description</p>
+                    <p><strong>Description:</strong> @bike.Description</p>
 
                     <AuthorizeView>
                         <Authorized Context="authContext">
@@ -53,16 +53,14 @@ else
                             }
                             @if (loggedInUserId == ownerId)
                             {
-                                <button class="btn btn-primary w-100 mb-2" @onclick="Edit">Edit Ad</button>
-                                <button class="btn btn-danger w-100" @onclick="Delete">Delete Ad</button>
+                                <button class="btn btn-primary w-100 mb-2" @onclick="OnEdit">Edit Ad</button>
+                                <button class="btn btn-danger w-100" @onclick="OnDelete">Delete Ad</button>
                             }
                         </Authorized>
                     </AuthorizeView>
                 </div>
             </div>
         </div>
-
-
 
         <!-- MESSAGES SECTION -->
         <div class="messages-section mt-5 p-4 border rounded">
@@ -202,15 +200,28 @@ else
             CloseReplyModal();
         }
     }
-    private void Edit()
+
+    private async Task SendMessageToOwner()
     {
-        // Navigate to edit page
-        Navigation.NavigateTo($"/edit-ad/{bike.Id}");
+        if (!string.IsNullOrWhiteSpace(newMessageToOwner) && bike != null)
+        {
+            await MessageService.SendMessageAsync(new Message
+            {
+                BikeId = bike.Id,
+                FromUserId = Auth.CurrentUserId,
+                ToUserId = bike.UserId,
+                Content = newMessageToOwner,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            newMessageToOwner = "";
+            messages = await MessageService.GetMessagesAsync(bike.Id);
+        }
     }
 
-    private void Edit() => Navigation.NavigateTo($"/edit-ad/{bike?.Id}");
+    private void OnEdit() => Navigation.NavigateTo($"/edit-ad/{bike?.Id}");
 
-    private async Task Delete()
+    private async Task OnDelete()
     {
         if (bike != null)
         {
