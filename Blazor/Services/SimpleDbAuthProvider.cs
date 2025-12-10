@@ -20,21 +20,25 @@ namespace Blazor.Services
         // Returns the current authentication state (used by Blazor's AuthorizeView, etc.)
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            return Task.FromResult(new AuthenticationState(_currentUser));
             // Wrap _currentUser in AuthenticationState and return as a completed task
+            return Task.FromResult(new AuthenticationState(_currentUser));
         }
 
-        // Logs in a user using email and password
+        // ------------------------------------------------------------
+        // Login a user using email and password
+        // Returns true if login succeeds, false if credentials are invalid
+        // ------------------------------------------------------------
         public async Task<bool> Login(string email, string password)
         {
-            using var connection = new NpgsqlConnection(_connectionString); // Create DB connection
-            await connection.OpenAsync(); // Open connection asynchronously
+            // Create and open PostgreSQL connection
+            using var connection = new NpgsqlConnection(_connectionString);
+            await connection.OpenAsync();
 
             // Prepare SQL command to select user ID where email and password hash match
             using var command = new NpgsqlCommand(
                 "SELECT id FROM users WHERE email=@Email AND password_hash=@PasswordHash", connection);
 
-            command.Parameters.AddWithValue("Email", email); // Bind email parameter
+            command.Parameters.AddWithValue("Email", email);           // Bind email parameter
             command.Parameters.AddWithValue("PasswordHash", Hash(password)); // Bind hashed password
 
             // Execute the query and get the user ID (or null if not found)
@@ -45,35 +49,42 @@ namespace Blazor.Services
 
             // Create claims identity for the logged-in user
             var identity = new ClaimsIdentity(
-                [
-                    new Claim(ClaimTypes.Name, email ?? ""), // Store user's email as claim
-                    new Claim("UserId", _currentUserId.ToString()) // Store user ID as claim
-                ],
+                new[]
+                {
+                    new Claim(ClaimTypes.Name, email ?? ""),           // Store user's email as claim
+                    new Claim("UserId", _currentUserId.ToString())    // Store user ID as claim
+                },
                 "database"); // Authentication type is "database"
 
             _currentUser = new ClaimsPrincipal(identity); // Wrap identity into a ClaimsPrincipal
 
-            // Notify Blazor that the authentication state has changed (important for AuthorizeView)
+            // Notify Blazor that the authentication state has changed
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
 
             return true; // Login successful
         }
 
-        // Logs out the current user
+        // ------------------------------------------------------------
+        // Logout the current user
+        // Clears current user ID and ClaimsPrincipal
+        // ------------------------------------------------------------
         public void Logout()
         {
             _currentUserId = 0; // Reset user ID
             _currentUser = new ClaimsPrincipal(new ClaimsIdentity()); // Reset ClaimsPrincipal (empty)
+
             // Notify Blazor of logout so UI updates (hides AuthorizeView content, etc.)
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
         }
 
+        // ------------------------------------------------------------
         // Hashes a string using SHA256 (used for password hashing)
+        // ------------------------------------------------------------
         private static string Hash(string input)
         {
-            var bytes = System.Text.Encoding.UTF8.GetBytes(input); // Convert input string to bytes
+            var bytes = System.Text.Encoding.UTF8.GetBytes(input);        // Convert input string to bytes
             var hash = System.Security.Cryptography.SHA256.HashData(bytes); // Compute SHA256 hash
-            return Convert.ToHexString(hash); // Convert hash bytes to hexadecimal string
+            return Convert.ToHexString(hash);                              // Convert hash bytes to hexadecimal string
         }
     }
 }

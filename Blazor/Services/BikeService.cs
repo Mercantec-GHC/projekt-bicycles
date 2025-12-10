@@ -1,17 +1,16 @@
-﻿using Blazor.Models;                      // Contains Bike model class
-using Microsoft.AspNetCore.Components.Forms; // For IBrowserFile
+﻿using Blazor.Models;                      // Contains Bike and User model classes
+using Microsoft.AspNetCore.Components.Forms; // For IBrowserFile (file uploads)
 using Npgsql;                             // PostgreSQL data provider
 using System.Text;                        // For building dynamic SQL strings
 namespace Blazor.Services
 {
     // BikeService handles all database operations related to bikes
-
     public class BikeService(string connectionString)
     {
         private readonly string _connectionString = connectionString;
 
         // ------------------------------------------------------------
-        // 2. Get a single bike by its ID (for detailed view page)
+        // 1. Get a single bike by its ID (for detailed bike page)
         // ------------------------------------------------------------
         public async Task<Bike?> GetBikeById(int id)
         {
@@ -19,7 +18,10 @@ namespace Blazor.Services
             await conn.OpenAsync();
 
             var sql = @"
-            SELECT b.*, u.id AS user_id, u.name AS user_name, u.email, u.phone, u.created_at AS user_created_at FROM bikes b  JOIN users u ON u.id = b.user_id WHERE b.id = @id";
+            SELECT b.*, u.id AS user_id, u.name AS user_name, u.email, u.phone, u.created_at AS user_created_at 
+            FROM bikes b  
+            JOIN users u ON u.id = b.user_id 
+            WHERE b.id = @id";
 
             using var cmd = new NpgsqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("id", id);
@@ -27,9 +29,11 @@ namespace Blazor.Services
             using var reader = await cmd.ExecuteReaderAsync();
             if (await reader.ReadAsync())
             {
+                // Map database columns to Bike and User objects
                 return new Bike
                 {
                     Id = (int)reader["id"],
+                    Description = reader["description"].ToString(),
                     Title = reader["title"].ToString(),
                     Price = (decimal)reader["price"],
                     UserId = (int)reader["user_id"],
@@ -38,7 +42,7 @@ namespace Blazor.Services
                     BikeCondition = reader["bike_condition"].ToString(),
                     Brand = reader["brand"].ToString(),
                     Location = reader["location"].ToString(),
-                    GearType = "Unknown",
+                    GearType = "Unknown", // default if null
                     ImageUrl = reader["image_url"]?.ToString() ?? "",
                     CreatedAt = (DateTime)reader["created_at"],
                     User = new User
@@ -48,10 +52,11 @@ namespace Blazor.Services
                     }
                 };
             }
-            return null;
+            return null; // return null if bike not found
         }
+
         // ------------------------------------------------------------
-        // 3. Get newest bikes (for homepage, sliders, carousel, etc.)
+        // 2. Get newest bikes for homepage, sliders, or carousel
         // ------------------------------------------------------------
         public List<Bike> GetNewestBikes(int count = 8)
         {
@@ -60,7 +65,11 @@ namespace Blazor.Services
             conn.Open();
 
             string sql = $@"
-            SELECT b.*, u.id AS user_id, u.name AS user_name FROM bikes b LEFT JOIN users u ON u.id = b.user_id ORDER BY b.created_at DESC LIMIT {count}";
+            SELECT b.*, u.id AS user_id, u.name AS user_name 
+            FROM bikes b 
+            LEFT JOIN users u ON u.id = b.user_id 
+            ORDER BY b.created_at DESC 
+            LIMIT {count}";
 
             using var cmd = new NpgsqlCommand(sql, conn);
             using var reader = cmd.ExecuteReader();
@@ -93,30 +102,33 @@ namespace Blazor.Services
             }
             return bikes;
         }
+
         // ------------------------------------------------------------
-        // 4. Get bikes using advanced filters (brand, color, etc.)
-        //    Used in the filtering/search page
+        // 3. Get bikes with filters (brand, type, color, etc.)
         // ------------------------------------------------------------
         public List<Bike> GetBikes(
-        string? brand = null,
-        string? type = null,
-        string? color = null,
-        string? locationFilter = null,
-        decimal? maxPrice = null,
-        int? modelYear = null,
-        string? condition = null)
+            string? brand = null,
+            string? type = null,
+            string? color = null,
+            string? locationFilter = null,
+            decimal? maxPrice = null,
+            int? modelYear = null,
+            string? condition = null)
         {
             var bikes = new List<Bike>();
             using var conn = new NpgsqlConnection(_connectionString);
             conn.Open();
 
             var sql = new StringBuilder(@"
-        SELECT b.*, u.name AS user_name
-        FROM bikes b
-        LEFT JOIN users u ON u.id = b.user_id
-        WHERE 1=1
-    ");
+                SELECT b.*, u.name AS user_name
+                FROM bikes b
+                LEFT JOIN users u ON u.id = b.user_id
+                WHERE 1=1
+            ");
+
             var cmd = new NpgsqlCommand { Connection = conn };
+
+            // Apply filters dynamically
             if (!string.IsNullOrEmpty(brand))
             {
                 sql.Append(" AND b.brand ILIKE @brand");
@@ -152,8 +164,9 @@ namespace Blazor.Services
                 sql.Append(" AND b.bike_condition = @condition");
                 cmd.Parameters.AddWithValue("condition", condition);
             }
-                sql.Append(" ORDER BY b.created_at DESC LIMIT 50");
-                cmd.CommandText = sql.ToString();
+
+            sql.Append(" ORDER BY b.created_at DESC LIMIT 50");
+            cmd.CommandText = sql.ToString();
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -177,39 +190,38 @@ namespace Blazor.Services
                     }
                 });
             }
+
             return bikes;
         }
+
         // ------------------------------------------------------------
-        // 5. Create a new bike advertisement, optionally with image upload
+        // 4. Create a new bike advertisement, optionally with image upload
         // ------------------------------------------------------------
         public async Task CreateAdAsync(Bike bike, IBrowserFile? imageFile = null)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
-            string? imageUrl = null;
-            // Handle image upload if provided
 
+            string? imageUrl = null;
+
+            // Handle image file upload
             if (imageFile != null)
             {
                 var uploads = Path.Combine("wwwroot/uploads");
-                // Create upload directory if missing
 
                 if (!Directory.Exists(uploads))
                     Directory.CreateDirectory(uploads);
 
-                // Extract file name and full path
                 var fileName = Path.GetFileName(imageFile.Name);
                 var filePath = Path.Combine(uploads, fileName);
 
-                // Save file to disk
                 await using var stream = File.Create(filePath);
                 await imageFile.OpenReadStream().CopyToAsync(stream);
 
-                // Public URL for the image
                 imageUrl = $"/uploads/{fileName}";
             }
 
-            // SQL command for creating a new bike record
+            // Insert new bike record
             var sql = @"
                 INSERT INTO bikes 
                 (user_id, title, price, color, type, model_year, gear_type, break_type, weight, bike_condition, 
@@ -220,8 +232,6 @@ namespace Blazor.Services
             ";
 
             await using var cmd = new NpgsqlCommand(sql, conn);
-
-            // Add parameters safely (avoid SQL injection, handle nulls)
 
             cmd.Parameters.AddWithValue("userId", bike.UserId);
             cmd.Parameters.AddWithValue("title", bike.Title ?? (object)DBNull.Value);
@@ -241,9 +251,12 @@ namespace Blazor.Services
             cmd.Parameters.AddWithValue("imageUrl", imageUrl ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("createdAt", DateTime.Now);
 
-            // Execute the insert command asynchronously
             await cmd.ExecuteNonQueryAsync();
         }
+
+        // ------------------------------------------------------------
+        // 5. Check if user exists by ID
+        // ------------------------------------------------------------
         public async Task<bool> CheckUserExistsAsync(int userId)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
@@ -251,17 +264,20 @@ namespace Blazor.Services
 
             var sql = "SELECT 1 FROM users WHERE id = @id";
             await using var cmd = new NpgsqlCommand(sql, conn);
-
             cmd.Parameters.AddWithValue("id", userId);
-            var result = await cmd.ExecuteScalarAsync();
 
+            var result = await cmd.ExecuteScalarAsync();
             return result != null;
         }
 
+        // ------------------------------------------------------------
+        // 6. Edit an existing bike ad
+        // ------------------------------------------------------------
         public async Task EditAd(Bike bike)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
+
             var sql = @"
                 UPDATE bikes SET
                     title = @title,
@@ -280,7 +296,9 @@ namespace Blazor.Services
                     description = @description
                 WHERE id = @id;
             ";
+
             await using var cmd = new NpgsqlCommand(sql, conn);
+
             cmd.Parameters.AddWithValue("id", bike.Id);
             cmd.Parameters.AddWithValue("title", bike.Title ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("price", bike.Price);
@@ -296,40 +314,48 @@ namespace Blazor.Services
             cmd.Parameters.AddWithValue("brand", bike.Brand ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("location", bike.Location ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("description", bike.Description ?? (object)DBNull.Value);
+
             await cmd.ExecuteNonQueryAsync();
         }
 
+        // ------------------------------------------------------------
+        // 7. Delete a bike ad by ID
+        // ------------------------------------------------------------
         public async Task DeleteAd(int bikeId)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
+
             var sql = "DELETE FROM bikes WHERE id = @id";
             await using var cmd = new NpgsqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("id", bikeId);
+
             await cmd.ExecuteNonQueryAsync();
         }
-        // Method to get distinct bike types
-        public async Task<List<string>> GetDistinctTypesAsync() 
+
+        // ------------------------------------------------------------
+        // 8. Get all distinct bike types for filters or dropdowns
+        // ------------------------------------------------------------
+        public async Task<List<string>> GetDistinctTypesAsync()
         {
             using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
             using var cmd = new NpgsqlCommand(
-                "SELECT DISTINCT type FROM bikes WHERE type IS NOT NULL AND type <> '' ORDER BY type ASC", 
-                conn); // SQL to get distinct non-empty types
+                "SELECT DISTINCT type FROM bikes WHERE type IS NOT NULL AND type <> '' ORDER BY type ASC",
+                conn);
 
-            // Initialize a list to hold the resulting types.
             var types = new List<string>();
             var reader = await cmd.ExecuteReaderAsync();
+
             while (await reader.ReadAsync())
             {
-                // Safely read the 'type' column, convert to string, and trim whitespace.
                 var type = reader["type"]?.ToString()?.Trim();
                 if (!string.IsNullOrWhiteSpace(type))
                     types.Add(type);
             }
+
             return types;
         }
     }
 }
-

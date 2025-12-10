@@ -1,187 +1,223 @@
-﻿@page "/saledetail/{id:int}" // Route parameter: bike ID
+﻿@page "/saledetail/{id:int}"
 @using Blazor.Models
 @using Blazor.Services
 @using Microsoft.AspNetCore.Components.Authorization
-@rendermode InteractiveServer
-@inject NavigationManager Navigation // Inject navigation helper
-
-@inject BikeService BikeService // Inject the service to get bike details
-@inject MessageService MessageService // Inject the service to handle messages
-@inject SimpleDbAuthProvider Auth // Inject the authentication provider
+@inject NavigationManager Navigation
+@inject BikeService BikeService
+@inject MessageService MessageService
+@inject SimpleDbAuthProvider Auth
 
 <h3>Bike Details</h3>
 
-@if (bike == null) // If the bike is not yet loaded
+@if (bike == null)
 {
-    <p>Loading...</p> // Show loading message
+    <p>Loading...</p>
 }
 else
 {
     <div class="container mt-5">
 
-        <!-- TITLE -->
-        <h2 class="text-center mb-4">@bike.Title</h2> <!-- Show bike title -->
+        <h2 class="text-center mb-4">@bike.Title</h2>
 
         <div class="row align-items-start">
-
-            <!-- LEFT: MAIN IMAGE -->
             <div class="col-md-6 text-center">
-                <img src="@currentImage"  
-                     class="main-image"
-                     alt="@bike.Title" />
-
-                @if (imageList.Count > 1) // If bike has multiple images
+                <img src="@currentImage" class="main-image img-fluid" alt="@bike.Title" />
+                @if (imageList.Count > 1)
                 {
                     <div class="thumbnail-row mt-3">
-                        @foreach (var img in imageList) // Render thumbnails
+                        @foreach (var img in imageList)
                         {
                             <img src="@img"
-                                 class="thumbnail @(img == currentImage ? "selected" : "")"  
-                                 @onclick="() => SelectImage(img)" /> // On click, select image
+                                 class="thumbnail @(img == currentImage ? "selected border border-primary" : "")"
+                                 @onclick="() => SelectImage(img)"
+                                 style="width:60px; cursor:pointer; margin-right:5px;" />
                         }
                     </div>
                 }
             </div>
 
-            <!-- RIGHT: INFO BOX -->
             <div class="col-md-6">
-                <div class="info-box p-4">
-                    <h3>@bike.Price.ToString("C")</h3> <!-- Display price with currency -->
+                <div class="info-box p-4 border rounded">
+                    <h3>@bike.Price.ToString("C")</h3>
                     <p><strong>Brand:</strong> @bike.Brand</p>
                     <p><strong>Condition:</strong> @bike.BikeCondition</p>
                     <p><strong>Location:</strong> @bike.Location</p>
                     <p><strong>Seller:</strong> @bike.User?.Name</p>
 
-                    <!-- AuthorizeView displays content based on login status -->
                     <AuthorizeView>
-                        <Authorized Context="authContext"> <!-- If user is logged in -->
-                            @* Show message box only if user is NOT the bike owner *@
+                        <Authorized Context="authContext">
                             @{
                                 var loggedInUserId = authContext.User.FindFirst("UserId")?.Value;
                                 var ownerId = bike.UserId.ToString();
                             }
-
                             @if (loggedInUserId == ownerId)
                             {
-                                <!-- Owner of the AD -->
                                 <button class="btn btn-primary w-100 mb-2" @onclick="Edit">Edit Ad</button>
                                 <button class="btn btn-danger w-100" @onclick="Delete">Delete Ad</button>
                             }
-                            else
-                            {
-                                <!-- NOT owner of the AD -->
-                                <textarea class="form-control mb-2"
-                                          placeholder="Write your message..."
-                                          @bind="newMessage"></textarea>
-
-                                <button class="btn btn-success w-100" @onclick="SendMessage">Send Message</button>
-                            }
                         </Authorized>
-                        <NotAuthorized> <!-- If user is not logged in -->
-                            <p class="text-muted mt-2">Login to contact the seller</p>
-                        </NotAuthorized>
                     </AuthorizeView>
                 </div>
             </div>
         </div>
 
-        <!-- DESCRIPTION SECTION -->
-        <div class="desc-section mt-5 p-4">
+        <div class="desc-section mt-5 p-4 border rounded">
             <h4 class="text-center mb-3">Description</h4>
-            <p class="description-text">@bike.Description</p> <!-- Show bike description -->
+            <p>@bike.Description</p>
         </div>
 
-        <!-- MESSAGES LIST -->
-        <div class="messages-section mt-5 p-4">
+        <!-- MESSAGES SECTION -->
+        <div class="messages-section mt-5 p-4 border rounded">
             <h4 class="mb-3">Messages</h4>
+
             @if (messages.Count == 0)
             {
-                <p>No messages yet.</p> <!-- If no messages -->
+                <p>No messages yet.</p>
             }
             else
             {
-                @foreach (var msg in messages) // Render each message
+                @foreach (var msg in messages)
                 {
                     <div class="card mb-2 p-2">
-                       <strong>@msg.FromUser?.Name → @msg.ToUser?.Name:</strong> @msg.Content
+                        <strong>@msg.FromUser?.Name → @msg.ToUser?.Name:</strong> @msg.Content
                         <div class="text-muted" style="font-size:0.8em">@msg.CreatedAt.ToString("dd-MM-yyyy HH:mm")</div>
 
+                        <AuthorizeView>
+                            <Authorized>
+                                @if (Auth.CurrentUserId != msg.FromUserId)
+                                {
+                                    <button class="btn btn-outline-primary btn-sm mt-1"
+                                            @onclick="() => OpenReplyModal(msg.FromUserId, msg.FromUser?.Name)">
+                                        Reply
+                                    </button>
+                                }
+                            </Authorized>
+                        </AuthorizeView>
                     </div>
                 }
             }
-        </div>
 
+            <!-- WRITE MESSAGE TO OWNER -->
+            <AuthorizeView>
+                <Authorized>
+                    @if (bike.UserId != Auth.CurrentUserId)
+                    {
+                        <div class="mt-4 p-3 border rounded">
+                            <h5>Send message to owner</h5>
+                            <textarea class="form-control mb-2" placeholder="Write your message..."
+                                      @bind="newMessageToOwner" rows="3"></textarea>
+                            <button class="btn btn-success w-100" @onclick="SendMessageToOwner">Send Message</button>
+                        </div>
+                    }
+                </Authorized>
+                <NotAuthorized>
+                    <p class="text-muted">Login to send messages</p>
+                </NotAuthorized>
+            </AuthorizeView>
+
+            <!-- REPLY MODAL -->
+            @if (showReplyModal)
+            {
+                <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Reply to @replyToUserName</h5>
+                                <button type="button" class="btn-close" @onclick="CloseReplyModal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <textarea class="form-control" @bind="newMessage" rows="3"></textarea>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-secondary" @onclick="CloseReplyModal">Cancel</button>
+                                <button class="btn btn-primary" @onclick="SendMessageFromModal">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
     </div>
 }
 
 @code {
-    [Parameter]
-    public int id { get; set; } // Bike ID from route
+    [Parameter] public int id { get; set; }
 
-    private Bike? bike; // Current bike object
-    private string currentImage = string.Empty; // Currently displayed image
-    private List<string> imageList = new List<string>(); // List of all bike images
+    private Bike? bike;
+    private string currentImage = "";
+    private List<string> imageList = new();
+    private List<Message> messages = new();
 
-    private string newMessage = ""; // Content of new message
-    private List<Message> messages = new List<Message>(); // Messages for this bike
+    private string newMessage = "";
+    private string newMessageToOwner = "";
 
-    // Called when component is initialized
+    private int replyToUserId;
+    private string replyToUserName = "";
+    private bool showReplyModal;
+
     protected override async Task OnInitializedAsync()
     {
-        bike = await BikeService.GetBikeById(id); // Load bike info from database
-
-        if (bike != null && !string.IsNullOrEmpty(bike.ImageUrl))
-        {
-            imageList.Add(bike.ImageUrl); // Add main image to list
-            currentImage = bike.ImageUrl; // Set as currently displayed
-        }
-
+        bike = await BikeService.GetBikeById(id);
         if (bike != null)
         {
-            messages = await MessageService.GetMessagesAsync(bike.Id); // Load messages for this bike
+            if (!string.IsNullOrEmpty(bike.ImageUrl))
+            {
+                imageList.Add(bike.ImageUrl);
+                currentImage = bike.ImageUrl;
+            }
+            messages = await MessageService.GetMessagesAsync(bike.Id);
         }
     }
 
-    // Change displayed image when thumbnail is clicked
     private void SelectImage(string img) => currentImage = img;
 
-    // Send a new message to the seller
-    private async Task SendMessage()
+    private void OpenReplyModal(int userId, string? userName)
     {
-        if (!string.IsNullOrWhiteSpace(newMessage) && bike != null) // Ensure message is not empty
-        {
-            var fromUserId = Auth.CurrentUserId; // Get logged-in user ID
-            var toUserId = bike.UserId; // Get bike owner ID
+        replyToUserId = userId;
+        replyToUserName = userName ?? "";
+        newMessage = $"@{replyToUserName}, ";
+        showReplyModal = true;
+    }
 
-            // Create and save new message
+    private void CloseReplyModal()
+    {
+        showReplyModal = false;
+        newMessage = "";
+        replyToUserId = 0;
+        replyToUserName = "";
+    }
+
+    private async Task SendMessageFromModal()
+    {
+        if (!string.IsNullOrWhiteSpace(newMessage) && bike != null)
+        {
             await MessageService.SendMessageAsync(new Message
             {
                 BikeId = bike.Id,
-                FromUserId = fromUserId,
-                ToUserId = toUserId,
+                FromUserId = Auth.CurrentUserId,
+                ToUserId = replyToUserId,
                 Content = newMessage,
-                CreatedAt = DateTime.UtcNow // Store timestamp
+                CreatedAt = DateTime.UtcNow
             });
 
-            newMessage = ""; // Clear input
-            messages = await MessageService.GetMessagesAsync(bike.Id); // Reload messages
+            messages = await MessageService.GetMessagesAsync(bike.Id);
+            CloseReplyModal();
         }
     }
-    private string? editMessage;
-
     private void Edit()
     {
         // Navigate to edit page
         Navigation.NavigateTo($"/edit-ad/{bike.Id}");
     }
+
+    private void Edit() => Navigation.NavigateTo($"/edit-ad/{bike?.Id}");
+
     private async Task Delete()
     {
         if (bike != null)
         {
-            await BikeService.DeleteAd(bike.Id); // Delete the bike ad
-            editMessage = "Ad deleted successfully!";
-            await Task.Delay(800); // Small delay to ensure deletion is processed
-            Navigation.NavigateTo("/"); // Redirect to homepage
+            await BikeService.DeleteAd(bike.Id);
+            Navigation.NavigateTo("/");
         }
     }
 }

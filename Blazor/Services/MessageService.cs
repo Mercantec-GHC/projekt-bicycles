@@ -8,7 +8,9 @@ namespace Blazor.Services
     {
         private readonly string _connectionString = connectionString; // PostgreSQL connection string
 
-        // Asynchronously retrieves all messages related to a specific bike
+        // ------------------------------------------------------------
+        // Retrieves all messages related to a specific bike asynchronously
+        // ------------------------------------------------------------
         public async Task<List<Message>> GetMessagesAsync(int bikeId)
         {
             var messages = new List<Message>(); // Initialize the list of messages
@@ -52,7 +54,9 @@ namespace Blazor.Services
             return messages; // Return the list of messages
         }
 
-        // Asynchronously inserts a new message into the database
+        // ------------------------------------------------------------
+        // Inserts a new message into the database asynchronously
+        // ------------------------------------------------------------
         public async Task SendMessageAsync(Message message)
         {
             // Open a PostgreSQL connection
@@ -65,16 +69,15 @@ namespace Blazor.Services
                 VALUES (@from, @to, @bike, @content, @createdAt)
             ", conn);
 
-            // Bind all parameters to prevent SQL injection
+            // Bind all parameters safely to prevent SQL injection
             cmd.Parameters.AddWithValue("from", message.FromUserId); // Sender ID
             cmd.Parameters.AddWithValue("to", message.ToUserId); // Receiver ID
             cmd.Parameters.AddWithValue("bike", message.BikeId); // Bike ID
             cmd.Parameters.AddWithValue("content", message.Content ?? ""); // Message text (nullable check)
             cmd.Parameters.AddWithValue("createdAt", message.CreatedAt); // Timestamp
 
-            // Execute the command asynchronously
+            // Execute the insert command asynchronously
             await cmd.ExecuteNonQueryAsync();
         }
-
     }
 }

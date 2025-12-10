@@ -1,17 +1,21 @@
-﻿using Blazor.Models;
-using Npgsql;
+﻿using Blazor.Models;  // Contains Bike, Message, and User model classes
+using Npgsql;          // PostgreSQL data provider
 
 namespace Blazor.Services
 {
+    // UserService handles all database operations related to users
     public class UserService
     {
-        private readonly string _connectionString;
+        private readonly string _connectionString; // Stores the database connection string
 
         public UserService(string connectionString)
         {
             _connectionString = connectionString;
         }
 
+        // ------------------------------------------------------------
+        // 1. Get all bikes belonging to a specific user
+        // ------------------------------------------------------------
         public async Task<List<Bike>> GetUserBikesAsync(int userId)
         {
             var bikes = new List<Bike>();
@@ -19,6 +23,7 @@ namespace Blazor.Services
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
+            // Query bikes by user_id
             var sql = @"SELECT * FROM bikes WHERE user_id = @userId ORDER BY created_at DESC";
             await using var cmd = new NpgsqlCommand(sql, conn);
             cmd.Parameters.AddWithValue("userId", userId);
@@ -42,6 +47,7 @@ namespace Blazor.Services
                 });
             }
 
+            // Fetch messages for each bike
             foreach (var bike in bikes)
             {
                 bike.Messages = await GetMessagesForBikeAsync(bike.Id);
@@ -50,6 +56,9 @@ namespace Blazor.Services
             return bikes;
         }
 
+        // ------------------------------------------------------------
+        // 2. Get all messages for a specific bike
+        // ------------------------------------------------------------
         public async Task<List<Message>> GetMessagesForBikeAsync(int bikeId)
         {
             var messages = new List<Message>();
@@ -86,12 +95,16 @@ namespace Blazor.Services
             return messages;
         }
 
+        // ------------------------------------------------------------
+        // 3. Sign up a new user
+        // Returns true if successful, false if email already exists
+        // ------------------------------------------------------------
         public async Task<bool> SignUpAsync(string name, string email, string password)
         {
             await using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            // Проверка email
+            // Check if the email already exists
             await using (var checkCmd = new NpgsqlCommand(
                 "SELECT COUNT(*) FROM users WHERE email=@Email", conn))
             {
@@ -99,16 +112,16 @@ namespace Blazor.Services
                 var count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync());
 
                 if (count > 0)
-                    return false; // email уже существует
+                    return false; // Email already exists
             }
 
-            // Вставка нового пользователя
+            // Insert new user record
             await using var insertCmd = new NpgsqlCommand(
                 @"INSERT INTO users (name, email, password_hash, created_at) 
-                VALUES (@Name, @Email, @PasswordHash, @CreatedAt)", conn);
+                  VALUES (@Name, @Email, @PasswordHash, @CreatedAt)", conn);
             insertCmd.Parameters.AddWithValue("Name", name);
             insertCmd.Parameters.AddWithValue("Email", email);
-            insertCmd.Parameters.AddWithValue("PasswordHash", Hash(password));
+            insertCmd.Parameters.AddWithValue("PasswordHash", Hash(password)); // Store hashed password
             insertCmd.Parameters.AddWithValue("CreatedAt", DateTime.UtcNow);
 
             await insertCmd.ExecuteNonQueryAsync();
@@ -116,12 +129,14 @@ namespace Blazor.Services
             return true;
         }
 
+        // ------------------------------------------------------------
+        // 4. Hash a password using SHA256
+        // ------------------------------------------------------------
         private string Hash(string input)
         {
-            var bytes = System.Text.Encoding.UTF8.GetBytes(input);
-            var hash = System.Security.Cryptography.SHA256.HashData(bytes);
-            return Convert.ToHexString(hash);
+            var bytes = System.Text.Encoding.UTF8.GetBytes(input);          // Convert string to bytes
+            var hash = System.Security.Cryptography.SHA256.HashData(bytes); // Compute SHA256 hash
+            return Convert.ToHexString(hash);                               // Convert hash to hexadecimal string
         }
-
     }
 }
