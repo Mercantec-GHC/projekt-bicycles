@@ -40,6 +40,7 @@ namespace Blazor.Services
                     Color = reader["color"]?.ToString(),
                     Type = reader["type"]?.ToString(),
                     BikeCondition = reader["bike_condition"]?.ToString(),
+                    Description = reader["description"]?.ToString(),
                     Brand = reader["brand"]?.ToString(),
                     Location = reader["location"]?.ToString(),
                     ImageUrl = reader["image_url"]?.ToString(),

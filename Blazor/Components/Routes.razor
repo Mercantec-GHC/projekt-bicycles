@@ -1,6 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 
-<CascadingAuthenticationState>
+<CascadingAuthenticationState> @* to make auth stance accessable for all child components *@
     <Router AppAssembly="@typeof(Program).Assembly" NotFoundPage="@typeof(Pages.NotFound)">
         <Found Context="routeData">
             <RouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)" />

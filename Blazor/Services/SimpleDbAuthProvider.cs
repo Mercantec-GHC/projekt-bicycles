@@ -10,7 +10,9 @@ namespace Blazor.Services
         private int _currentUserId; // Stores the ID of the currently logged-in user
 
         // _currentUser holds the current user's ClaimsPrincipal (empty by default)
-        private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
+        private ClaimsPrincipal _currentUser = new ClaimsPrincipal // like we make new user 
+            (new ClaimsIdentity() // like we make new user's identity (pas for example) where data saves (Claims)
+            );
 
         private readonly string _connectionString = connectionString; // Stores the PostgreSQL connection string
 
@@ -20,7 +22,7 @@ namespace Blazor.Services
         // Returns the current authentication state (used by Blazor's AuthorizeView, etc.)
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // Wrap _currentUser in AuthenticationState and return as a completed task
+            // Wrap _currentUser in AuthenticationState and return as a completed task, not async 
             return Task.FromResult(new AuthenticationState(_currentUser));
         }
 
@@ -42,10 +44,10 @@ namespace Blazor.Services
             command.Parameters.AddWithValue("PasswordHash", Hash(password)); // Bind hashed password
 
             // Execute the query and get the user ID (or null if not found)
-            var idObj = await command.ExecuteScalarAsync();
+            var idObj = await command.ExecuteScalarAsync(); // returns first column of first row in result set, object, null or DBNull.Value 
             if (idObj == null || idObj == DBNull.Value) return false; // Login failed
 
-            _currentUserId = Convert.ToInt32(idObj); // Save current user ID
+            _currentUserId = Convert.ToInt32(idObj); // Save current user ID from object to int
 
             // Create claims identity for the logged-in user
             var identity = new ClaimsIdentity(
