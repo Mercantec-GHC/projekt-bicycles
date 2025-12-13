@@ -359,5 +359,61 @@ namespace Blazor.Services
 
             return types;
         }
+        // ------------------------------------------------------------
+        // Updates (replaces) the image for an existing bike ad
+        // ------------------------------------------------------------
+        public async Task UpdateAdImageAsync(int bikeId, IBrowserFile imageFile)
+        {
+            // Open a connection to the PostgreSQL database
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            // Define the upload folder inside wwwroot
+            var uploads = Path.Combine("wwwroot/uploads");
+
+            // Create the uploads folder if it does not exist
+            if (!Directory.Exists(uploads))
+                Directory.CreateDirectory(uploads);
+
+            // Generate a unique file name to avoid overwriting existing images
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.Name)}";
+            var filePath = Path.Combine(uploads, fileName);
+
+            // Save the uploaded image file to disk
+            await using var stream = File.Create(filePath);
+            await imageFile
+                .OpenReadStream(maxAllowedSize: 10_000_000) // Limit file size (10 MB)
+                .CopyToAsync(stream);
+
+            // Create the relative URL that will be stored in the database
+            var imageUrl = $"/uploads/{fileName}";
+
+            // Update the image URL for the specific bike in the database
+            var sql = "UPDATE bikes SET image_url = @imageUrl WHERE id = @id;";
+            await using var cmd = new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("id", bikeId);
+            cmd.Parameters.AddWithValue("imageUrl", imageUrl);
+
+            // Execute the UPDATE command
+            await cmd.ExecuteNonQueryAsync();
+        }
+
+        // Removes the image from a bike ad (sets image_url to NULL)
+        public async Task RemoveAdImageAsync(int bikeId)
+        {
+            // Open a connection to the PostgreSQL database
+            await using var conn = new NpgsqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            // SQL query to remove the image reference from the database
+            var sql = "UPDATE bikes SET image_url = NULL WHERE id = @id;";
+            await using var cmd = new NpgsqlCommand(sql, conn);
+
+            cmd.Parameters.AddWithValue("id", bikeId);
+
+            // Execute the UPDATE command
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 }

@@ -7,88 +7,180 @@
 
 <h3 class="mb-4">Edit Ad</h3>
 
+@* Show loading message while the bike data is being fetched *@
 @if (bike == null)
 {
     <div class="alert alert-info">Loading...</div>
 }
 else
 {
-    <EditForm Model="@bike" OnValidSubmit="@SaveChanges" class="card p-4 shadow-sm" style="max-width: 500px;">
+    @* EditForm binds directly to the Bike model *@
+    <EditForm Model="@bike" OnValidSubmit="@SaveChanges"
+              class="card p-4 shadow-sm" style="max-width: 500px;">
+
+        @* Title *@
         <div class="mb-3">
             <label class="form-label">Title</label>
-            <InputText @bind-Value="bike.Title" class="form-control" placeholder="Enter title" />
+            <InputText @bind-Value="bike.Title"
+                       class="form-control"
+                       placeholder="Enter title" />
         </div>
 
+        @* Price *@
         <div class="mb-3">
             <label class="form-label">Price</label>
-            <InputNumber @bind-Value="bike.Price" class="form-control" placeholder="Enter price" />
+            <InputNumber @bind-Value="bike.Price"
+                         class="form-control"
+                         placeholder="Enter price" />
         </div>
 
+        @* Brand *@
         <div class="mb-3">
             <label class="form-label">Brand</label>
-            <InputText @bind-Value="bike.Brand" class="form-control" placeholder="Enter brand" />
+            <InputText @bind-Value="bike.Brand"
+                       class="form-control"
+                       placeholder="Enter brand" />
         </div>
 
+        @* Type *@
         <div class="mb-3">
             <label class="form-label">Type</label>
-            <InputText @bind-Value="bike.Type" class="form-control" placeholder="Enter type" />
+            <InputText @bind-Value="bike.Type"
+                       class="form-control"
+                       placeholder="Enter type" />
         </div>
 
+        @* Color *@
         <div class="mb-3">
             <label class="form-label">Color</label>
-            <InputText @bind-Value="bike.Color" class="form-control" placeholder="Enter color" />
+            <InputText @bind-Value="bike.Color"
+                       class="form-control"
+                       placeholder="Enter color" />
         </div>
 
+        @* Model year *@
         <div class="mb-3">
             <label class="form-label">Model Year</label>
-            <InputNumber @bind-Value="bike.ModelYear" class="form-control" placeholder="Enter model year" />
+            <InputNumber @bind-Value="bike.ModelYear"
+                         class="form-control"
+                         placeholder="Enter model year" />
         </div>
 
+        @* Bike condition *@
         <div class="mb-3">
             <label class="form-label">Condition</label>
-            <InputText @bind-Value="bike.BikeCondition" class="form-control" placeholder="Enter condition" />
+            <InputText @bind-Value="bike.BikeCondition"
+                       class="form-control"
+                       placeholder="Enter condition" />
         </div>
 
+        @* Location *@
         <div class="mb-3">
             <label class="form-label">Location</label>
-            <InputText @bind-Value="bike.Location" class="form-control" placeholder="Enter location" />
+            <InputText @bind-Value="bike.Location"
+                       class="form-control"
+                       placeholder="Enter location" />
         </div>
 
+        @* Description *@
         <div class="mb-3">
             <label class="form-label">Description</label>
-            <InputTextArea @bind-Value="bike.Description" class="form-control" placeholder="Enter description" rows="4" />
+            <InputTextArea @bind-Value="bike.Description"
+                           class="form-control"
+                           placeholder="Enter description"
+                           rows="4" />
         </div>
 
+        @* Show current image if the ad already has one *@
+        @if (!string.IsNullOrEmpty(bike.ImageUrl))
+        {
+            <div class="mb-3">
+                <img src="@bike.ImageUrl"
+                     class="img-thumbnail mb-2"
+                     style="max-width: 200px;" />
 
+                @* Delete image button *@
+                <button class="btn btn-danger btn-sm"
+                        @onclick="RemoveImage">
+                    Delete image
+                </button>
+            </div>
+        }
 
-        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+        @* File input for selecting a new image *@
+        <div class="mb-3">
+            <label class="form-label">Change image</label>
+            <InputFile OnChange="OnImageSelected" />
+        </div>
+
+        @* Save changes button *@
+        <button type="submit" class="btn btn-primary w-100">
+            Save Changes
+        </button>
     </EditForm>
 
+    @* Success message after saving *@
     @if (!string.IsNullOrEmpty(editMessage))
     {
-        <div class="alert alert-success mt-3">@editMessage</div>
+        <div class="alert alert-success mt-3">
+            @editMessage
+        </div>
     }
 }
 
 @code {
+    // Route parameter (bike ID)
     [Parameter]
     public int id { get; set; }
+
+    // The bike being edited
     private Bike? bike;
+
+    // Message shown after successful edit
     private string? editMessage;
 
+    // Holds a newly selected image file (if any)
+    private IBrowserFile? newImage;
+
+    // Load the bike when the page is initialized
     protected override async Task OnInitializedAsync()
     {
         bike = await BikeService.GetBikeById(id);
+
         if (bike == null)
         {
             editMessage = "Bike ad not found.";
         }
     }
 
+    // Called when the form is submitted successfully
     private async Task SaveChanges()
     {
+        // Update text-based bike information
         await BikeService.EditAd(bike);
+
+        // If a new image was selected, upload and update it
+        if (newImage != null)
+        {
+            await BikeService.UpdateAdImageAsync(bike.Id, newImage);
+        }
+
         editMessage = "Ad updated successfully!";
+
+        // Navigate back to the ad detail page
         Navigation.NavigateTo($"/saledetail/{bike.Id}");
+    }
+
+    // Store the selected image file
+    private void OnImageSelected(InputFileChangeEventArgs e)
+    {
+        newImage = e.File;
+    }
+
+    // Remove the image from the ad
+    private async Task RemoveImage()
+    {
+        await BikeService.RemoveAdImageAsync(bike.Id);
+        bike.ImageUrl = null;
     }
 }
