@@ -37,14 +37,6 @@
 
 @code {
 
-    // should not make new Bike here, it comes from GetNewestBikes(list with bikes) 
-    // public Bike Bike { get; set; }
-
-    private void OpenSalesCard(int bikeId)
-    {
-        NavigationManager.NavigateTo($"/saledetail/{bikeId}");
-    }
-
     private List<Bike> NewestBikes = new List<Bike>(); // List to store newest bikes
 
     protected override void OnInitialized()

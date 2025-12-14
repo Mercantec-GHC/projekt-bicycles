@@ -100,9 +100,9 @@
 
             // Get logged-in user
             var authState = await AuthStateProvider.GetAuthenticationStateAsync(); //Get information about the current logged-in user.
-            var user = authState.User; //Extrcacts the user object.
+            var user = authState.User; //Extracts the user object.
 
-            // GGets the UserId claim that was created when the user logged in.
+            // Gets the UserId claim that was created when the user logged in.
             var userIdClaim = user.FindFirst("UserId")?.Value;  //claim is a piece of data about the user. for example, their ID, email, or roles.
                                                                 //value is the actual data stored in the claim.
             // Validate claim
@@ -121,7 +121,7 @@
             }
 
             // Assign the current user's ID to the bike
-            bike.UserId = userId; //links user and bikkes by setting the UserId property of the bike object to the logged-in user's ID.
+            bike.UserId = userId; //links user and bikes by setting the UserId property of the bike object to the logged-in user's ID.
 
             // Create the bike ad in the database
             await BikeService.CreateAdAsync(bike, imageFile); //Calls a method in BikeService to create the bike ad in the database, passing in the bike object and the uploaded image file.
@@ -132,7 +132,6 @@
             // Reset form
             bike = new Bike(); //Resets the bike object to a new instance, clearing the form inputs.
             imageFile = null;
-
             
         }
         catch (Exception ex) //Catches any exceptions that occur during the ad creation process.
