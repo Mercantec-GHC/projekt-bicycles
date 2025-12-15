@@ -22,18 +22,6 @@ else
         <div class="row align-items-start">
             <div class="col-md-6 text-center">
                 <img src="@currentImage" class="main-image img-fluid" alt="@bike.Title" />
-                @if (imageList.Count > 1)
-                {
-                    <div class="thumbnail-row mt-3">
-                        @foreach (var img in imageList)
-                        {
-                            <img src="@img"
-                                 class="thumbnail @(img == currentImage ? "selected border border-primary" : "")"
-                                 @onclick="() => SelectImage(img)"
-                                 style="width:60px; cursor:pointer; margin-right:5px;" />
-                        }
-                    </div>
-                }
             </div>
 
             <div class="col-md-6">
@@ -141,7 +129,6 @@ else
 
     private Bike? bike;
     private string currentImage = "";
-    private List<string> imageList = new();
     private List<Message> messages = new();
 
     private string newMessage = "";
@@ -158,14 +145,11 @@ else
         {
             if (!string.IsNullOrEmpty(bike.ImageUrl))
             {
-                imageList.Add(bike.ImageUrl);
                 currentImage = bike.ImageUrl;
             }
             messages = await MessageService.GetMessagesAsync(bike.Id);
         }
     }
-
-    private void SelectImage(string img) => currentImage = img;
 
     private void OpenReplyModal(int userId, string? userName)
     {
