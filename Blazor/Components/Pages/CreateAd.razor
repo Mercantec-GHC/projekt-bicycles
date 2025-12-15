@@ -10,13 +10,13 @@
 <div class="create-ad-container">
     <h3>Create Bike Ad</h3>
 
-    @if (!string.IsNullOrEmpty(errorMessage)) //Checks if there is an error message.
+    @if (!string.IsNullOrEmpty(errorMessage)) //Checks if there is an error message
     {
         <div class="alert alert-danger">@errorMessage</div>
         //Displays the error message in a styled alert box.
     }
 
-    @if (!string.IsNullOrEmpty(successMessage)) //Checks if there is a success message.
+    @if (!string.IsNullOrEmpty(successMessage)) //Checks if there is a success message
     {
         <div class="alert alert-success">@successMessage</div>
     }
