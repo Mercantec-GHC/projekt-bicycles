@@ -70,19 +70,19 @@ else
             }
             else
             {
-                @foreach (var msg in messages)
+                @foreach (var message in messages)
                 {
                     <div class="card mb-2 p-2">
-                        <strong>@msg.FromUser?.Name → @msg.ToUser?.Name:</strong> @msg.Content
-                        <div class="text-muted" style="font-size:0.8em">@msg.CreatedAt.ToString("dd-MM-yyyy HH:mm")</div>
+                        <strong>@message.FromUser?.Name → @message.ToUser?.Name:</strong> @message.Content
+                        <div class="text-muted" style="font-size:0.8em">@message.CreatedAt.ToString("dd-MM-yyyy HH:mm")</div>
 
                         <!-- Show Reply button if current user is not the sender -->
                         <AuthorizeView>
                             <Authorized>
-                                @if (Auth.CurrentUserId != msg.FromUserId)
+                                @if (Auth.CurrentUserId != message.FromUserId)
                                 {
                                     <button class="btn btn-outline-primary btn-sm mt-1"
-                                            @onclick="() => OpenReplyModal(msg.FromUserId, msg.FromUser?.Name)">
+                                            @onclick="() => OpenReplyModal(message.FromUserId, message.FromUser?.Name)">
                                         Reply
                                     </button>
                                 }
