@@ -21,9 +21,10 @@ else
 
         <div class="row align-items-start">
             <div class="col-md-6 text-center">
+                <!-- Display bike image if available, otherwise show placeholder text -->
                 @if (!string.IsNullOrWhiteSpace(bike.ImageUrl))
                 {
-                    <img src="@bike.ImageUrl" class="main-image img-fluid" alt="@bike.Title" />
+                    <img src="@bike.ImageUrl" class="main-image img-fluid" />
                 }
                 else
                 {
@@ -41,6 +42,7 @@ else
                     <p><strong>Seller:</strong> @bike.User?.Name</p>
                     <p><strong>Description:</strong> @bike.Description</p>
 
+                    <!-- Show Edit/Delete buttons only if logged-in user is the owner -->
                     <AuthorizeView>
                         <Authorized Context="authContext">
                             @{
@@ -74,6 +76,7 @@ else
                         <strong>@msg.FromUser?.Name → @msg.ToUser?.Name:</strong> @msg.Content
                         <div class="text-muted" style="font-size:0.8em">@msg.CreatedAt.ToString("dd-MM-yyyy HH:mm")</div>
 
+                        <!-- Show Reply button if current user is not the sender -->
                         <AuthorizeView>
                             <Authorized>
                                 @if (Auth.CurrentUserId != msg.FromUserId)
@@ -135,16 +138,17 @@ else
 @code {
     [Parameter] public int id { get; set; }
 
-    private Bike? bike;
-    private List<Message> messages = new();
+    private Bike? bike; // Holds the bike details
+    private List<Message> messages = new(); // Holds all messages related to the bike
 
-    private string newMessage = "";
-    private string newMessageToOwner = "";
+    private string newMessage = ""; // Message content for reply modal
+    private string newMessageToOwner = ""; // Message content for sending to owner
 
-    private int replyToUserId;
-    private string replyToUserName = "";
-    private bool showReplyModal;
+    private int replyToUserId; // ID of user to reply to
+    private string replyToUserName = ""; // Name of user to reply to
+    private bool showReplyModal; // Controls visibility of reply modal
 
+    // Load bike details and messages when component initializes
     protected override async Task OnInitializedAsync()
     {
         bike = await BikeService.GetBikeById(id);
@@ -153,7 +157,7 @@ else
             messages = await MessageService.GetMessagesAsync(bike.Id);
         }
     }
-
+   
     private void OpenReplyModal(int userId, string? userName)
     {
         replyToUserId = userId;
