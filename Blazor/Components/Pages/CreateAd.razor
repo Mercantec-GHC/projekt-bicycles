@@ -12,12 +12,13 @@
 
     @if (!string.IsNullOrEmpty(errorMessage)) //Checks if there is an error message.
     {
-        <div class="alert alert-danger">@errorMessage</div> //Displays the error message in a styled alert box.
+        <div class="alert alert-danger">@errorMessage</div>
+        //Displays the error message in a styled alert box.
     }
 
     @if (!string.IsNullOrEmpty(successMessage)) //Checks if there is a success message.
     {
-        <div class="alert alert-success">@successMessage</div> 
+        <div class="alert alert-success">@successMessage</div>
     }
 
     @*Creates a from bound to the bike object *@
@@ -27,7 +28,7 @@
         <ValidationSummary />
 
         <div class="mb-3">
-            <label class="form-label">Title:</label> 
+            <label class="form-label">Title:</label>
             <InputText @bind-Value="bike.Title" class="form-control" /> @*Text input bound to bike.Title.*@
         </div>
 
@@ -105,19 +106,11 @@
             // Gets the UserId claim that was created when the user logged in.
             var userIdClaim = user.FindFirst("UserId")?.Value;  //claim is a piece of data about the user. for example, their ID, email, or roles.
                                                                 //value is the actual data stored in the claim.
-            // Validate claim
+                                                                // Validate claim
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId)) //Checks if the UserId claim is missing or invalid. or cannot be converted to an integer.
             {
                 errorMessage = "Cannot determine your user ID. Please log in again."; //Sets an error message if the claim is invalid.
                 return; //stops the method.
-            }
-
-            // Verify that this user exists in the database
-            var dbUserExists = await BikeService.CheckUserExistsAsync(userId); //Calls a method in BikeService to check if a user with the given userId exists in the database.
-            if (!dbUserExists) //If the user does not exist in the database.
-            {
-                errorMessage = "Logged-in user does not exist in the system.";
-                return;
             }
 
             // Assign the current user's ID to the bike
@@ -132,7 +125,7 @@
             // Reset form
             bike = new Bike(); //Resets the bike object to a new instance, clearing the form inputs.
             imageFile = null;
-            
+
         }
         catch (Exception ex) //Catches any exceptions that occur during the ad creation process.
         {

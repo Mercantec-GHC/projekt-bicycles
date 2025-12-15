@@ -156,6 +156,9 @@ else
     // Called when the form is submitted successfully
     private async Task SaveChanges()
     {
+        if (bike == null)
+            return;
+
         // Update text-based bike information
         await BikeService.EditAd(bike);
 
@@ -180,6 +183,9 @@ else
     // Remove the image from the ad
     private async Task RemoveImage()
     {
+        if (bike == null)
+            return;
+
         await BikeService.RemoveAdImageAsync(bike.Id);
         bike.ImageUrl = null;
     }
