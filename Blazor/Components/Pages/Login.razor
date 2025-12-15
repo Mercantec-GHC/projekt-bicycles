@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Npgsql
 
-@inject NavigationManager NavigationManager     // Used to redirect user
+@inject NavigationManager NavigationManager     // Used to redirect user.
 @inject AuthenticationStateProvider Auth        // Injected auth provider (base type)
 
 <h3 style="text-align: center;">Login</h3>
@@ -42,7 +42,7 @@
         }
 
         // Cast the injected provider to your custom one
-        var authProvider = (SimpleDbAuthProvider)Auth;
+        SimpleDbAuthProvider authProvider = (SimpleDbAuthProvider)Auth;
 
         // Try to authenticate user
         var ok = await authProvider.Login(Email, Password);
