@@ -21,7 +21,15 @@ else
 
         <div class="row align-items-start">
             <div class="col-md-6 text-center">
-                <img src="@currentImage" class="main-image img-fluid" alt="@bike.Title" />
+                @if (!string.IsNullOrWhiteSpace(bike.ImageUrl))
+                {
+                    <img src="@bike.ImageUrl" class="main-image img-fluid" alt="@bike.Title" />
+                }
+                else
+                {
+                    <div class="text-muted">No Picture.</div>
+                }
+
             </div>
 
             <div class="col-md-6">
@@ -128,7 +136,6 @@ else
     [Parameter] public int id { get; set; }
 
     private Bike? bike;
-    private string currentImage = "";
     private List<Message> messages = new();
 
     private string newMessage = "";
@@ -143,10 +150,6 @@ else
         bike = await BikeService.GetBikeById(id);
         if (bike != null)
         {
-            if (!string.IsNullOrEmpty(bike.ImageUrl))
-            {
-                currentImage = bike.ImageUrl;
-            }
             messages = await MessageService.GetMessagesAsync(bike.Id);
         }
     }
