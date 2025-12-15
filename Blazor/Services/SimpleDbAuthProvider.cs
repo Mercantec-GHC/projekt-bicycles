@@ -51,7 +51,7 @@ namespace Blazor.Services
             var identity = new ClaimsIdentity(
                 new[]
                 {
-                    new Claim(ClaimTypes.Email, email ?? ""),           // Store user's email as claim
+                    new Claim(ClaimTypes.Name, email ?? ""),           // Store user's email as claim
                     new Claim("UserId", _currentUserId.ToString())    // Store user ID as claim
                 },
                 "database"); // Authentication type is "database"
