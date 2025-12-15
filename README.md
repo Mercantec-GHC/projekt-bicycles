@@ -3,7 +3,7 @@
 ## Pitch - Hvad har i lavet og hvilke teknologier har i brugt (blazor + den database i bruger) - Maks 150 ord
 Bike WebShop er en webapplikation, hvor brugere kan købe og sælge cykler.  
 Brugere kan oprette annoncer, redigere og slette deres egne annoncer samt sende beskeder til hinanden direkte på en annonce.  
-Der er også mulighed at sign up / login / logout
+Der er også mulighed at sign up / login / logout.
 Projektet er udviklet som en Blazor Server-applikation og anvender en PostgreSQL-database til lagring af brugere, annoncer og beskeder.
 
 Anvendte teknologier:
