@@ -10,16 +10,10 @@
 
 <div class="filters mb-4">
     <!-- Filter inputs -->
-    <select @bind="brandFilter"
-            @bind:event="onchange"
-            @bind:after="OnBrandFilterChanged"
-            class="form-control mb-2">
-        <option value="">All Brands</option>
-        <option value="Trek">Trek</option>
-        <option value="Giant">Giant</option>
-        <option value="Specialized">Specialized</option>
-        <option value="Cannondale">Cannondale</option>
-    </select>
+    <input placeholder="Brand"
+           @bind="brandFilter" @bind:event="onchange"
+           @bind:after="OnBrandFilterChanged" class="form-control mb-2" />
+
 
     <select @bind="typeFilter"
             @bind:event="onchange"
