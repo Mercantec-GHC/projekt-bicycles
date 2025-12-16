@@ -17,6 +17,8 @@ Anvendte teknologier:
 
 ## Embedded Video og designfil 
 
+[Se video på Youtube](https://www.youtube.com/watch?v=TWx32OYZJqk)
+
 ## Opstartsguide af projektet - Hvordan starter man det!
 Forudsætninger
 - .NET SDK installeret
