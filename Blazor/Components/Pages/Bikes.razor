@@ -15,6 +15,10 @@
             @bind:after="OnBrandFilterChanged"
             class="form-control mb-2">
         <option value="">All Brands</option>
+        <option value="Trek">Trek</option>
+        <option value="Giant">Giant</option>
+        <option value="Specialized">Specialized</option>
+        <option value="Cannondale">Cannondale</option>
     </select>
 
     <select @bind="typeFilter"
@@ -22,6 +26,10 @@
             @bind:after="OnTypeFilterChanged"
             class="form-control mb-2">
         <option value="">All Types</option>
+        <option value="Mountain">Mountain</option>
+        <option value="City">City</option>
+        <option value="Electric">Electric</option>
+        <option value="Road">Road</option>
     </select>
 
     <input type="number" placeholder="Max Price"
