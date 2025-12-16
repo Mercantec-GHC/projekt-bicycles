@@ -120,26 +120,29 @@ else
     // Sync dropdown changes with the URL for better navigation and back/forward support
     private void OnTypeFilterChanged() => UpdateUrl();
     private void OnBrandFilterChanged() => UpdateUrl();
-
-
-        // LoadBikes() will be called automatically via OnParametersSet() because the URL changes
     
+    // Update the URL with current filters
     private void UpdateUrl()
     {
         var query = new List<string>();
 
+        // Only add filters that have values
         if (!string.IsNullOrWhiteSpace(typeFilter))
             query.Add($"type={Uri.EscapeDataString(typeFilter)}");
 
         if (!string.IsNullOrWhiteSpace(brandFilter))
             query.Add($"brand={Uri.EscapeDataString(brandFilter)}");
 
-        var url = query.Any()
-            ? $"/bikes?{string.Join("&", query)}"
-            : "/bikes";
+        // Construct the new URL
+        string url;
+
+        // If there are query parameters, append them
+        if (query.Any())
+            url = "/bikes?" + string.Join("&", query);
+        else
+            url = "/bikes";
 
         NavigationManager.NavigateTo(url, replace: false);
     }
-
 }
 
