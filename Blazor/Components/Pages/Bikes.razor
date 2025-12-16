@@ -10,21 +10,18 @@
 
 <div class="filters mb-4">
     <!-- Filter inputs -->
-    <input placeholder="Brand"
-           @bind="brandFilter"
-           @bind:event="oninput"
-           @bind:after="LoadBikes"
-           class="form-control mb-2" />
+    <select @bind="brandFilter"
+            @bind:event="onchange"
+            @bind:after="OnBrandFilterChanged"
+            class="form-control mb-2">
+        <option value="">All Brands</option>
+    </select>
 
     <select @bind="typeFilter"
             @bind:event="onchange"
             @bind:after="OnTypeFilterChanged"
             class="form-control mb-2">
         <option value="">All Types</option>
-        <option value="Mountain">Mountain</option>
-        <option value="City">City</option>
-        <option value="Electric">Electric</option>
-        <option value="Road">Road</option>
     </select>
 
     <input type="number" placeholder="Max Price"
@@ -86,12 +83,17 @@ else
     [SupplyParameterFromQuery]
     public string? Type { get; set; }
 
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? Brand { get; set; }
+
     protected override void OnParametersSet()
     {
         // Update type filter whenever the URL changes (e.g., /bikes?type=Road or /bikes)
         typeFilter = string.IsNullOrWhiteSpace(Type) ? string.Empty : Type.Trim();
+        brandFilter = string.IsNullOrWhiteSpace(Brand) ? string.Empty : Brand.Trim();
 
-         LoadBikes();
+        LoadBikes();
     }
 
     private void LoadBikes()
@@ -108,14 +110,28 @@ else
     }
 
     // Sync dropdown changes with the URL for better navigation and back/forward support
-    private void OnTypeFilterChanged()
-    {
-        if (string.IsNullOrWhiteSpace(typeFilter))
-            NavigationManager.NavigateTo("/bikes", replace: false);
-        else
-            NavigationManager.NavigateTo($"/bikes?type={Uri.EscapeDataString(typeFilter)}", replace: false);
+    private void OnTypeFilterChanged() => UpdateUrl();
+    private void OnBrandFilterChanged() => UpdateUrl();
+
 
         // LoadBikes() will be called automatically via OnParametersSet() because the URL changes
+    
+    private void UpdateUrl()
+    {
+        var query = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(typeFilter))
+            query.Add($"type={Uri.EscapeDataString(typeFilter)}");
+
+        if (!string.IsNullOrWhiteSpace(brandFilter))
+            query.Add($"brand={Uri.EscapeDataString(brandFilter)}");
+
+        var url = query.Any()
+            ? $"/bikes?{string.Join("&", query)}"
+            : "/bikes";
+
+        NavigationManager.NavigateTo(url, replace: false);
     }
+
 }
 

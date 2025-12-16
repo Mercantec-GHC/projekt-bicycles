@@ -338,27 +338,33 @@ namespace Blazor.Services
         // ------------------------------------------------------------
         // 8. Get all distinct bike types for filters or dropdowns
         // ------------------------------------------------------------
-        public async Task<List<string>> GetDistinctTypesAsync()
+        public async Task<(List<string> Types, List<string> Brands)> GetDistinctTypesAndBrandsAsync()
         {
             using var conn = new NpgsqlConnection(_connectionString);
             await conn.OpenAsync();
 
-            using var cmd = new NpgsqlCommand(
-                "SELECT DISTINCT type FROM bikes WHERE type IS NOT NULL AND type <> '' ORDER BY type ASC",
-                conn);
-
             var types = new List<string>();
-            var reader = await cmd.ExecuteReaderAsync();
+            var brands = new List<string>();
 
-            while (await reader.ReadAsync())
+            using (var cmd = new NpgsqlCommand(
+                "SELECT DISTINCT type FROM bikes WHERE type IS NOT NULL AND type <> '' ORDER BY type", conn))
+            using (var reader = await cmd.ExecuteReaderAsync())
             {
-                var type = reader["type"]?.ToString()?.Trim();
-                if (!string.IsNullOrWhiteSpace(type))
-                    types.Add(type);
+                while (await reader.ReadAsync())
+                    types.Add(reader["type"].ToString().Trim());
             }
 
-            return types;
+            using (var cmd = new NpgsqlCommand(
+                "SELECT DISTINCT brand FROM bikes WHERE brand IS NOT NULL AND brand <> '' ORDER BY brand", conn))
+            using (var reader = await cmd.ExecuteReaderAsync())
+            {
+                while (await reader.ReadAsync())
+                    brands.Add(reader["brand"].ToString().Trim());
+            }
+
+            return (types, brands);
         }
+
         // ------------------------------------------------------------
         // Updates (replaces) the image for an existing bike ad
         // ------------------------------------------------------------

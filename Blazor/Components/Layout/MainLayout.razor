@@ -35,6 +35,25 @@
                     }
                 </ul>
             </div>
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Brands</a>
+                <ul class="dropdown-menu">
+
+                    <!-- Goes through the types from the database -->
+                    @if (brands == null || brands.Count == 0)
+                    {
+                        <li><span class="dropdown-item-text text-muted">No Brands</span></li>
+                    }
+                    else
+                    {
+                        @foreach (var brand in brands)
+                        {
+                            var href = $"/bikes?brand={Uri.EscapeDataString(brand)}";
+                            <li><a class="dropdown-item" href="@href">@brand</a></li>
+                        }
+                    }
+                </ul>
+            </div>
 
         </div>
 
@@ -79,11 +98,14 @@
         Nav.NavigateTo("/"); // Redirect to homepage
     }
 
-    private List<string>? types; // List to hold distinct bike types
+    private List<string>? types;
+    private List<string>? brands;// List to hold distinct bike types
 
     protected override async Task OnInitializedAsync()
     {
-        types = await BikeService.GetDistinctTypesAsync(); // Fetch distinct bike types from the database
+        var data = await BikeService.GetDistinctTypesAndBrandsAsync();
+        types = data.Types;
+        brands = data.Brands;// Fetch distinct bike types from the database
     }
 }
 
