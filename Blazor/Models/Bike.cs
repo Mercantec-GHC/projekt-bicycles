@@ -1,4 +1,6 @@
-﻿namespace Blazor.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Blazor.Models
 {
     public class Bike
     {
@@ -6,6 +8,8 @@
 
         // user who listed the bike (just ID)
         public int UserId { get; set; }
+
+        [Required(ErrorMessage = "Title is required")]
         public string? Title { get; set; }
         public decimal Price { get; set; }
         public string? Color { get; set; }
