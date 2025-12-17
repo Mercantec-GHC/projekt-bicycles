@@ -46,13 +46,8 @@ namespace Blazor.Services
 
             _currentUserId = Convert.ToInt32(idObj); // Save current user ID from object to int
 
-            // Create claims identity for the logged-in user
-            var identity = new ClaimsIdentity(
-                [
-                    new Claim(ClaimTypes.Name, email ?? ""),           // Store user's email as claim
-                    new Claim("UserId", _currentUserId.ToString())    // Store user ID as claim
-                ],
-                "database"); // Authentication type is "database"
+            // Create claims identity for the logged-in user, including email and user ID claims 
+            var identity = new ClaimsIdentity([new Claim(ClaimTypes.Name, email ?? ""), new Claim("UserId", _currentUserId.ToString())], "database"); // Authentication type is "database"
 
             _currentUser = new ClaimsPrincipal(identity); // Wrap identity into a ClaimsPrincipal
 

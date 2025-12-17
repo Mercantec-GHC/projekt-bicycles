@@ -106,8 +106,7 @@ namespace Blazor.Services
             await conn.OpenAsync();
 
             // Check if the email already exists
-            await using (var checkCmd = new NpgsqlCommand(
-                "SELECT COUNT(*) FROM users WHERE email=@Email", conn)) // check if email exists in users table
+            await using (var checkCmd = new NpgsqlCommand("SELECT COUNT(*) FROM users WHERE email=@Email", conn)) // check if email exists in users table
             {
                 checkCmd.Parameters.AddWithValue("Email", email); // add email parameter to command for security
                 var count = Convert.ToInt64(await checkCmd.ExecuteScalarAsync()); // execute command and get count of records with that email

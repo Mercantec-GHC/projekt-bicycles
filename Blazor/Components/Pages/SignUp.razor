@@ -4,7 +4,7 @@
 @using Npgsql
 
 @inject NavigationManager NavigationManager     // Used to redirect user after signup,
-@inject AuthenticationStateProvider Auth        // Injected auth provider (base type)
+@inject SimpleDbAuthProvider Auth        // Injected auth provider (base type)
 @inject UserService UserService                 // Service to handle user-related operations.
 
 <h3 style="text-align: center;">Sign Up</h3>
@@ -53,8 +53,7 @@
             return;
         }
 
-        var authProvider = (SimpleDbAuthProvider)Auth;
-        await authProvider.Login(Email, Password);
+        await Auth.Login(Email, Password);
 
         NavigationManager.NavigateTo("/");
     }

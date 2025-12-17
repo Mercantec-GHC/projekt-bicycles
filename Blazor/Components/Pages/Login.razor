@@ -4,7 +4,7 @@
 @using Npgsql
 
 @inject NavigationManager NavigationManager     // Used to redirect user.
-@inject AuthenticationStateProvider Auth        // Injected auth provider (base type)
+@inject SimpleDbAuthProvider Auth       // Injected auth provider (base type)
 
 <h3 style="text-align: center;">Login</h3>
 
@@ -41,11 +41,8 @@
             return;
         }
 
-        // Cast the injected provider to your custom one
-        SimpleDbAuthProvider authProvider = (SimpleDbAuthProvider)Auth;
-
         // Try to authenticate user
-        var ok = await authProvider.Login(Email, Password);
+        var ok = await Auth.Login(Email, Password);
 
         if (!ok)
         {
