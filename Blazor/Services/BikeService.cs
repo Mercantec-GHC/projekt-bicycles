@@ -42,7 +42,7 @@ namespace Blazor.Services
                     BikeCondition = reader["bike_condition"].ToString(),
                     Brand = reader["brand"].ToString(),
                     Location = reader["location"].ToString(),
-                    GearType = "Unknown", // default if null
+                    GearType = reader["gear_type"]?.ToString() ?? "Unknown",
                     ImageUrl = reader["image_url"]?.ToString() ?? "",
                     CreatedAt = (DateTime)reader["created_at"],
                     User = new User
