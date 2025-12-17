@@ -119,13 +119,6 @@ else
         </button>
     </EditForm>
 
-    @* Success message after saving *@
-    @if (!string.IsNullOrEmpty(editMessage))
-    {
-        <div class="alert alert-success mt-3">
-            @editMessage
-        </div>
-    }
 }
 
 @code {
@@ -136,9 +129,6 @@ else
     // The bike being edited
     private Bike? bike;
 
-    // Message shown after successful edit
-    private string? editMessage;
-
     // Holds a newly selected image file (if any)
     private IBrowserFile? newImage;
 
@@ -146,11 +136,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         bike = await BikeService.GetBikeById(id);
-
-        if (bike == null)
-        {
-            editMessage = "Bike ad not found.";
-        }
     }
 
     // Called when the form is submitted successfully
@@ -167,8 +152,6 @@ else
         {
             await BikeService.UpdateAdImageAsync(bike.Id, newImage);
         }
-
-        editMessage = "Ad updated successfully!";
 
         // Navigate back to the ad detail page
         Navigation.NavigateTo($"/saledetail/{bike.Id}");
