@@ -10,12 +10,12 @@ namespace Blazor.Services
         private int _currentUserId; // Stores the ID of the currently logged-in user
 
         // _currentUser holds the current user's ClaimsPrincipal (empty by default)
-        private ClaimsPrincipal _currentUser = new ClaimsPrincipal(new ClaimsIdentity());// like we make new user and user's identity (pas for example) where data saves (Claims)
+        private ClaimsPrincipal _currentUser = new ClaimsPrincipal(new ClaimsIdentity()); // like we make new user and user's identity (pas for example) where data saves (Claims)
 
         private readonly string _connectionString = connectionString; // Stores the PostgreSQL connection string
 
         // Property to access the current user ID from outside the class
-        public int CurrentUserId => _currentUserId;
+        public int CurrentUserId => _currentUserId; // readonly property to get current user ID
 
         // Returns the current authentication state (used by Blazor's AuthorizeView, etc.)
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -35,8 +35,7 @@ namespace Blazor.Services
             await connection.OpenAsync();
 
             // Prepare SQL command to select user ID where email and password hash match
-            using var command = new NpgsqlCommand(
-                "SELECT id FROM users WHERE email=@Email AND password_hash=@PasswordHash", connection);
+            using var command = new NpgsqlCommand("SELECT id FROM users WHERE email=@Email AND password_hash=@PasswordHash", connection);
 
             command.Parameters.AddWithValue("Email", email);           // Bind email parameter
             command.Parameters.AddWithValue("PasswordHash", Hash(password)); // Bind hashed password
@@ -49,16 +48,15 @@ namespace Blazor.Services
 
             // Create claims identity for the logged-in user
             var identity = new ClaimsIdentity(
-                new[]
-                {
+                [
                     new Claim(ClaimTypes.Name, email ?? ""),           // Store user's email as claim
                     new Claim("UserId", _currentUserId.ToString())    // Store user ID as claim
-                },
+                ],
                 "database"); // Authentication type is "database"
 
             _currentUser = new ClaimsPrincipal(identity); // Wrap identity into a ClaimsPrincipal
 
-            // Notify Blazor that the authentication state has changed
+            // Notify Blazor that the authentication state has changed to update UI
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
 
             return true; // Login successful
